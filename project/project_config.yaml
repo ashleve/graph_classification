@@ -1,9 +1,9 @@
-num_of_gpus: 0
+num_of_gpus: -1
 
 loggers:
     wandb:
-        project: "project_template_test"
-        entity: "kino"
+        project: "tests"
+        team: "graph_research"
         log_model: True
         offline: False
 
