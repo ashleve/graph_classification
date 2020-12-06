@@ -3,7 +3,7 @@ num_of_gpus: -1
 loggers:
     wandb:
         project: "tests"
-        team: "graph_research"
+        entity: "graph_research"
         log_model: True
         offline: False
 

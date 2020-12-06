@@ -108,7 +108,7 @@ def main(run_config_name: str, use_wandb: bool):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("-r", "--run_config", type=str, default="MNIST_CLASSIFIER_V1")
+    parser.add_argument("-r", "--run_config", type=str, default="GRAPH_CLASSIFIER_MNIST_150")
     parser.add_argument("-u", "--use_wandb", type=bool, default=True)
     args = parser.parse_args()
 
