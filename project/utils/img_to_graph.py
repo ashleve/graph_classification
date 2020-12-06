@@ -47,8 +47,8 @@ def convert_img_to_superpixels_graph(image, desired_nodes=75, add_position_to_fe
 
     # compute node positions
     segments_ids = np.unique(segments)
-    centers = np.array([np.mean(np.nonzero(segments == i), axis=1) for i in segments_ids])
-    centers = centers.astype(int)
+    pos = np.array([np.mean(np.nonzero(segments == i), axis=1) for i in segments_ids])
+    pos = pos.astype(int)
 
     # add edges
     vs_right = np.vstack([segments[:, :-1].ravel(), segments[:, 1:].ravel()])
@@ -76,7 +76,7 @@ def convert_img_to_superpixels_graph(image, desired_nodes=75, add_position_to_fe
     for node in G.nodes:
         x[node, :] = G.nodes[node]["features"]
 
-    return x, edge_index, centers
+    return x, edge_index, pos
 
 
 def better_istarmap(self, func, iterable, chunksize=1):
