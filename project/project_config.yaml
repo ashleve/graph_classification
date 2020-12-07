@@ -4,7 +4,7 @@ loggers:
     wandb:
         project: "tests"
         entity: "graph_research"
-        log_model: True
+        log_model: False
         offline: False
 
 callbacks:
@@ -15,7 +15,7 @@ callbacks:
         mode: "max"
     early_stop:
         monitor: "val_acc"
-        patience: 100
+        patience: 10
         mode: "max"
 
 printing:

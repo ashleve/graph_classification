@@ -1,8 +1,10 @@
-from torch_geometric.datasets import MNISTSuperpixels
+from project.data_modules.proteins.transforms import Indegree
+from torch.utils.data import ConcatDataset, random_split
+from torch_geometric.datasets import TUDataset
 from torch_geometric.data import DataLoader
-from torch.utils.data import random_split, ConcatDataset
 from torch_geometric import transforms
 import pytorch_lightning as pl
+import torch
 
 
 class DataModule(pl.LightningDataModule):
@@ -10,7 +12,7 @@ class DataModule(pl.LightningDataModule):
         super().__init__()
 
         # hparams["data_dir"] is always automatically set to "path_to_project/data/"
-        self.data_dir = hparams["data_dir"] + "/MNIST_superpixels"
+        self.data_dir = hparams["data_dir"]
 
         self.train_val_split_ratio = hparams.get("train_val_split_ratio") or 0.9
         self.train_val_split = hparams.get("train_val_split") or None
@@ -25,15 +27,12 @@ class DataModule(pl.LightningDataModule):
         self.data_val = None
         self.data_test = None
 
-    def prepare_data(self):
-        """Download data if needed."""
-        pass
-
     def setup(self, stage=None):
         """Load data. Set variables: self.data_train, self.data_val, self.data_test."""
-        trainset = MNISTSuperpixels(self.data_dir, train=True, transform=self.transforms)
-        testset = MNISTSuperpixels(self.data_dir, train=False, transform=self.transforms)
-        dataset_full = ConcatDataset(datasets=[trainset, testset])
+        # dataset_full = TUDataset(self.data_dir, name="PROTEINS", use_node_attr=True)
+        dataset_full = TUDataset(self.data_dir, name="DD", use_node_attr=True)
+        NUM_FEATURES, NUM_CLASSES = dataset_full.num_features, dataset_full.num_classes
+        print('# %s: [FEATURES]-%d [NUM_CLASSES]-%d' % (dataset_full, NUM_FEATURES, NUM_CLASSES))
 
         if not self.train_val_split:
             train_length = int(len(dataset_full) * self.train_val_split_ratio)

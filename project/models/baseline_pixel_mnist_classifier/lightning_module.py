@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import torch
 
 # custom models
-from models.simple_mnist_classifier.models import *
+from models.baseline_pixel_mnist_classifier.models import *
 
 
 class LitModel(pl.LightningModule):

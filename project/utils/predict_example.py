@@ -2,7 +2,7 @@ from data_modules.mnist_digits_datamodule import transforms
 from PIL import Image
 
 # the LitModel you import should be the same as the one you used for training!
-from models.simple_mnist_classifier.lightning_module import LitModel
+from models.baseline_pixel_mnist_classifier.lightning_module import LitModel
 
 
 def predict():

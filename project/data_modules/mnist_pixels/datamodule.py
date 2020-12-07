@@ -21,8 +21,10 @@ class DataModule(pl.LightningDataModule):
         # hparams["data_dir"] is always automatically set to "path_to_project/data/"
         self.data_dir = hparams["data_dir"]
 
-        self.batch_size = hparams.get("batch_size") or 64
         self.train_val_split_ratio = hparams.get("train_val_split_ratio") or 0.9
+        self.train_val_split = hparams.get("train_val_split") or None
+
+        self.batch_size = hparams.get("batch_size") or 64
         self.num_workers = hparams.get("num_workers") or 1
         self.pin_memory = hparams.get("pin_memory") or False
 
