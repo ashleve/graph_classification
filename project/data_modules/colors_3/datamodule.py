@@ -26,7 +26,7 @@ class DataModule(pl.LightningDataModule):
 
     def setup(self, stage=None):
         """Load data. Set variables: self.data_train, self.data_val, self.data_test."""
-        dataset_full = TUDataset(self.data_dir, name="DD", use_node_attr=True)
+        dataset_full = TUDataset(self.data_dir, name="COLORS-3", use_node_attr=True)
 
         if not self.train_val_split:
             train_length = int(len(dataset_full) * self.train_val_split_ratio)

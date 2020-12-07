@@ -32,7 +32,7 @@ def train(project_config: dict, run_config: dict, use_wandb: bool):
         project_config=project_config,
         run_config=run_config,
         use_wandb=use_wandb,
-        wandb_save_dir=logger.save_dir
+        wandb_save_dir=logger.save_dir if use_wandb else None
     )
 
     # Init callbacks specified in run config
@@ -40,7 +40,12 @@ def train(project_config: dict, run_config: dict, use_wandb: bool):
     callbacks.extend(custom_callbacks)
 
     # Init PyTorch Lightning trainer ⚡
-    trainer: pl.Trainer = init_trainer(project_config, run_config, logger, callbacks)
+    trainer: pl.Trainer = init_trainer(
+        project_config=project_config,
+        run_config=run_config,
+        logger=logger,
+        callbacks=callbacks
+    )
 
     # Evaluate model on test set before training
     # trainer.test(model=lit_model, datamodule=datamodule)
@@ -71,7 +76,8 @@ def main(run_config_name: str, use_wandb: bool):
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("-r", "--run_config", type=str, default="GCN_MNIST_75")
-    parser.add_argument("-u", "--use_wandb", type=bool, default=True)
+    parser.add_argument("-n", "--no_wandb", dest='use_wandb', action='store_false')
+    parser.set_defaults(use_wandb=True)
     args = parser.parse_args()
 
     main(run_config_name=args.run_config, use_wandb=args.use_wandb)

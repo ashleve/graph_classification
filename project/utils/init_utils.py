@@ -117,7 +117,7 @@ def init_wandb_logger(project_config: dict,
         wandb_logger.watch(lit_model, log=None)
 
     wandb_logger.log_hyperparams({
-        "model_name": lit_model.model.__class__.__name__,
+        "model": lit_model.model.__class__.__name__,
         "optimizer": lit_model.configure_optimizers().__class__.__name__,
         "train_size": len(datamodule.data_train)
         if hasattr(datamodule, 'data_train') and datamodule.data_train is not None else 0,

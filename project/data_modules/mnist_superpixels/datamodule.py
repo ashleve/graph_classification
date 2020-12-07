@@ -1,7 +1,6 @@
+from torch.utils.data import random_split, ConcatDataset
 from torch_geometric.datasets import MNISTSuperpixels
 from torch_geometric.data import DataLoader
-from torch.utils.data import random_split, ConcatDataset
-from torch_geometric import transforms
 import pytorch_lightning as pl
 
 

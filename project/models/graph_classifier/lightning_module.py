@@ -26,7 +26,7 @@ class LitModel(pl.LightningModule):
     # logic for a single training step
     def training_step(self, batch, batch_idx):
         logits = self.model(batch)
-        loss = F.nll_loss(logits, batch.y)
+        loss = F.nll_loss(logits, batch.y.long())
 
         # training metrics
         preds = torch.argmax(logits, dim=1)
@@ -40,7 +40,7 @@ class LitModel(pl.LightningModule):
     # logic for a single validation step
     def validation_step(self, batch, batch_idx):
         logits = self.model(batch)
-        loss = F.nll_loss(logits, batch.y)
+        loss = F.nll_loss(logits, batch.y.long())
 
         # training metrics
         preds = torch.argmax(logits, dim=1)

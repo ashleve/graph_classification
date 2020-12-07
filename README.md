@@ -34,7 +34,7 @@ Next, you can train model without logging
 # train model without Weights&Biases
 # choose run config from project/run_configs.yaml
 cd project
-python train.py --use_wandb=False --run_config MNIST_CLASSIFIER_V1
+python train.py --no_wandb --run_config MNIST_CLASSIFIER_V1
 ```
 
 Or you can train model with Weights&Biases logging
@@ -49,7 +49,7 @@ loggers:
 # train model with Weights&Biases
 # choose run config from project/run_configs.yaml
 cd project
-python train.py --use_wandb=True --run_config BASELINE_PIXEL_MNIST_CLASSIFIER
+python train.py --run_config BASELINE_PIXEL_MNIST_CLASSIFIER
 ```
 <br>
 
