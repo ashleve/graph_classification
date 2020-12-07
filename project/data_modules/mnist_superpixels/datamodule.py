@@ -9,9 +9,17 @@ class DataModule(pl.LightningDataModule):
     def __init__(self, hparams):
         super().__init__()
 
-        self.data_dir = hparams.get("data_dir") or "data/MNIST_superpixels"
-        self.batch_size = hparams.get("batch_size") or 32
+        # hparams["data_dir"] is always automatically set to "path_to_project/data/"
+        self.data_dir = hparams["data_dir"] + "/MNIST_superpixels"
+
+        self.num_nodes = 75
+
         self.train_val_split_ratio = hparams.get("train_val_split_ratio") or 0.9
+        self.val_set_length = hparams.get("val_set_length") or None
+        if self.val_set_length:
+            self.train_val_split_ratio = None
+
+        self.batch_size = hparams.get("batch_size") or 32
         self.num_workers = hparams.get("num_workers") or 1
         self.pin_memory = hparams.get("pin_memory") or False
 

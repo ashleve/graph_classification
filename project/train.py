@@ -31,18 +31,15 @@ def train(project_config: dict, run_config: dict, use_wandb: bool):
     callbacks: List[pl.Callback] = init_main_callbacks(project_config=project_config)
 
     # Add custom callbacks from utils/callbacks.py
-    callbacks.extend([
-        # MetricsHeatmapLoggerCallback(),
-        # UnfreezeModelCallback(wait_epochs=5),
-    ])
     if use_wandb:
-        callbacks.append(
+        callbacks.extend([
             SaveCodeToWandbCallback(
                 base_dir=os.path.dirname(__file__),
                 wandb_save_dir=logger.save_dir,
                 run_config=run_config
             ),
-        )
+            MetricsHeatmapLoggerCallback(),
+        ])
 
     # Get path to checkpoint you want to resume with if it was set in the run config
     resume_from_checkpoint = run_config.get("resume_training", {}).get("checkpoint_path", None)
@@ -108,7 +105,7 @@ def main(run_config_name: str, use_wandb: bool):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("-r", "--run_config", type=str, default="GRAPH_CLASSIFIER_MNIST_75")
+    parser.add_argument("-r", "--run_config", type=str, default="GCN_MNIST_150")
     parser.add_argument("-u", "--use_wandb", type=bool, default=True)
     args = parser.parse_args()
 

@@ -21,7 +21,7 @@ def convert_img_to_superpixels_graph(image, desired_nodes=75, add_position_to_fe
         } for node in range(num_of_nodes)
     }
 
-    # get rgb
+    # get rgb values and positions
     for y in range(height):
         for x in range(width):
             node = segments[y, x]
@@ -32,7 +32,7 @@ def convert_img_to_superpixels_graph(image, desired_nodes=75, add_position_to_fe
             pos = np.array([float(x) / width, float(y) / height])
             nodes[node]["pos_list"].append(pos)
 
-    # compute features (from rgb only)
+    # compute features
     G = nx.Graph()
     for node in nodes:
         nodes[node]["rgb_list"] = np.stack(nodes[node]["rgb_list"])
