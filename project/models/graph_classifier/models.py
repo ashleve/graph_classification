@@ -13,6 +13,7 @@ class GCN(nn.Module):
         self.conv3 = GCNConv(hparams['conv2_size'], hparams['conv3_size'])
 
         self.linear1 = nn.Linear(hparams['conv3_size'], hparams['lin1_size'])
+        self.drop1 = nn.Dropout(p=hparams['dropout1'])
         self.linear2 = nn.Linear(hparams['lin1_size'], hparams['num_classes'])
 
     def forward(self, data):
@@ -23,6 +24,7 @@ class GCN(nn.Module):
         x = self.conv2(x, edge_index)
         x = F.relu(x)
         x = self.conv3(x, edge_index)
+        x = F.relu(x)
 
         if self.hparams['pool_method'] == 'add':
             x = global_add_pool(x, data.batch)
@@ -33,6 +35,7 @@ class GCN(nn.Module):
 
         x = self.linear1(x)
         x = F.relu(x)
+        x = self.drop1(x)
         x = self.linear2(x)
 
         return F.log_softmax(x, dim=0)

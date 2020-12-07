@@ -1,6 +1,6 @@
-GRAPH_CLASSIFIER_MNIST_150:
+GRAPH_CLASSIFIER_MNIST_75:
     trainer:
-        max_epochs: 5
+        max_epochs: 50
         gradient_clip_val: 0.5
         accumulate_grad_batches: 1
         limit_train_batches: 1.0
@@ -10,23 +10,24 @@ GRAPH_CLASSIFIER_MNIST_150:
         weight_decay: 0.000001
         num_node_features: 3
         num_classes: 10
-        pool_method: "mean"
-        conv1_size: 64
+        pool_method: "max"
+        conv1_size: 32
         conv2_size: 64
-        conv3_size: 32
-        lin1_size: 128
+        conv3_size: 512
+        lin1_size: 64
+        dropout1: 0.25
     dataset:
-        datamodule_folder: "mnist_superpixels_150"
-        batch_size: 64
-        train_val_split_ratio: 0.9
+        datamodule_folder: "mnist_superpixels_75"
+        batch_size: 32
+        train_val_split_ratio: 0.857
     wandb:
         group: None
         tags: []
 
 
-GRAPH_CLASSIFIER_MNIST:
+GRAPH_CLASSIFIER_MNIST_150:
     trainer:
-        max_epochs: 5
+        max_epochs: 50
         gradient_clip_val: 0.5
         accumulate_grad_batches: 1
         limit_train_batches: 1.0
@@ -34,17 +35,21 @@ GRAPH_CLASSIFIER_MNIST:
         model_folder: "graph_classifier"
         lr: 0.001
         weight_decay: 0.000001
-        num_node_features: 1
+        num_node_features: 3
         num_classes: 10
-        pool_method: "mean"
-        conv1_size: 64
+        pool_method: "max"
+        conv1_size: 32
         conv2_size: 64
-        conv3_size: 32
-        lin1_size: 128
+        conv3_size: 512
+        lin1_size: 64
+        dropout1: 0.25
     dataset:
-        datamodule_folder: "mnist_superpixels"
-        batch_size: 64
+        datamodule_folder: "mnist_superpixels_150"
+        batch_size: 32
         train_val_split_ratio: 0.9
+    wandb:
+        group: None
+        tags: []
 
 
 IMG_CLASSIFIER_MNIST:
