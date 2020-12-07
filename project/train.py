@@ -1,4 +1,3 @@
-from pytorch_lightning.profiler import SimpleProfiler
 from pytorch_lightning.loggers import WandbLogger
 from argparse import ArgumentParser
 import pytorch_lightning as pl
@@ -7,8 +6,9 @@ import yaml
 import os
 
 # utils
-from utils.init_utils import init_lit_model, init_data_module, init_main_callbacks, init_wandb_logger
-import utils.callbacks
+from utils.init_utils import init_lit_model, init_data_module, init_trainer
+from utils.init_utils import init_main_callbacks, init_custom_callbacks
+from utils.init_utils import init_wandb_logger
 
 
 def train(project_config: dict, run_config: dict, use_wandb: bool):
@@ -27,57 +27,20 @@ def train(project_config: dict, run_config: dict, use_wandb: bool):
         log_path=os.path.join(os.path.dirname(__file__), "logs/")
     ) if use_wandb else None
 
-    # Init ModelCheckpoint and EarlyStopping callbacks
-    callbacks: List[pl.Callback] = init_main_callbacks(project_config=project_config)
+    # Init ModelCheckpoint, EarlyStopping and SaveCodeToWandb callbacks
+    callbacks: List[pl.Callback] = init_main_callbacks(
+        project_config=project_config,
+        run_config=run_config,
+        use_wandb=use_wandb,
+        wandb_save_dir=logger.save_dir
+    )
 
-    # Add custom callbacks from utils/callbacks.py
-    if use_wandb:
-        callbacks.append(utils.callbacks.SaveCodeToWandbCallback(
-                base_dir=os.path.dirname(__file__),
-                wandb_save_dir=logger.save_dir,
-                run_config=run_config
-        ))
-
-    callback_config = run_config.get("callbacks", {})
-    for conf in callback_config:
-        callback = getattr(utils.callbacks, conf)
-        callbacks.append(callback(**callback_config[conf]))
-
-    # Get path to checkpoint you want to resume with if it was set in the run config
-    resume_from_checkpoint = run_config.get("resume_training", {}).get("checkpoint_path", None)
+    # Init callbacks specified in run config
+    custom_callbacks: List[pl.Callback] = init_custom_callbacks(callbacks_config=run_config.get("callbacks", {}))
+    callbacks.extend(custom_callbacks)
 
     # Init PyTorch Lightning trainer ⚡
-    trainer = pl.Trainer(
-        # whether to use gpu and how many
-        gpus=project_config["num_of_gpus"],
-
-        # experiment logging
-        logger=logger,
-
-        # useful callbacks
-        callbacks=callbacks,
-
-        # resume training from checkpoint if it was set in the run config
-        resume_from_checkpoint=resume_from_checkpoint
-        if resume_from_checkpoint != "None"
-        and resume_from_checkpoint != "False"
-        and resume_from_checkpoint is not False
-        else None,
-
-        # print related
-        progress_bar_refresh_rate=project_config["printing"]["progress_bar_refresh_rate"],
-        profiler=SimpleProfiler() if project_config["printing"]["profiler"] else None,
-        weights_summary=project_config["printing"]["weights_summary"],
-
-        # number of validation sanity checks
-        num_sanity_val_steps=3,
-
-        # default log dir if no logger is found
-        default_root_dir="logs/lightning_logs",
-
-        # insert all other trainer parameters specified in run config
-        **run_config["trainer"]
-    )
+    trainer: pl.Trainer = init_trainer(project_config, run_config, logger, callbacks)
 
     # Evaluate model on test set before training
     # trainer.test(model=lit_model, datamodule=datamodule)
