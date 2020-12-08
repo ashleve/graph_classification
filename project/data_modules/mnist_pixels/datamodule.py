@@ -1,4 +1,4 @@
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader, ConcatDataset, random_split
 from torchvision.transforms import transforms
 from torchvision.datasets import MNIST
 import pytorch_lightning as pl
@@ -42,13 +42,15 @@ class DataModule(pl.LightningDataModule):
     def setup(self, stage=None):
         """Load data. Set variables: self.data_train, self.data_val, self.data_test."""
         trainset = MNIST(self.data_dir, train=True, transform=self.transforms)
+        testset = MNIST(self.data_dir, train=False, transform=self.transforms)
+        dataset_full = ConcatDataset(datasets=[trainset, testset])
 
-        train_length = int(len(trainset) * self.train_val_split_ratio)
-        val_length = len(trainset) - train_length
-        train_val_split = [train_length, val_length]
+        if not self.train_val_split:
+            train_length = int(len(dataset_full) * self.train_val_split_ratio)
+            val_length = len(dataset_full) - train_length
+            self.train_val_split = [train_length, val_length]
 
-        self.data_train, self.data_val = random_split(trainset, train_val_split)
-        self.data_test = MNIST(self.data_dir, train=False, transform=self.transforms)
+        self.data_train, self.data_val = random_split(dataset_full, self.train_val_split)
 
     def train_dataloader(self):
         return DataLoader(self.data_train, batch_size=self.batch_size, num_workers=self.num_workers,

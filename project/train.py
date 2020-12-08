@@ -6,9 +6,7 @@ import yaml
 import os
 
 # utils
-from utils.init_utils import init_lit_model, init_data_module, init_trainer
-from utils.init_utils import init_main_callbacks, init_custom_callbacks
-from utils.init_utils import init_wandb_logger
+from utils.init_utils import init_lit_model, init_data_module, init_trainer, init_callbacks, init_wandb_logger
 
 
 def train(project_config: dict, run_config: dict, use_wandb: bool):
@@ -27,17 +25,12 @@ def train(project_config: dict, run_config: dict, use_wandb: bool):
         log_path=os.path.join(os.path.dirname(__file__), "logs/")
     ) if use_wandb else None
 
-    # Init ModelCheckpoint, EarlyStopping and SaveCodeToWandb callbacks
-    callbacks: List[pl.Callback] = init_main_callbacks(
+    # Init callbacks
+    callbacks: List[pl.Callback] = init_callbacks(
         project_config=project_config,
         run_config=run_config,
-        use_wandb=use_wandb,
-        wandb_save_dir=logger.save_dir if use_wandb else None
+        use_wandb=use_wandb
     )
-
-    # Init callbacks specified in run config
-    custom_callbacks: List[pl.Callback] = init_custom_callbacks(callbacks_config=run_config.get("callbacks", {}))
-    callbacks.extend(custom_callbacks)
 
     # Init PyTorch Lightning trainer ⚡
     trainer: pl.Trainer = init_trainer(

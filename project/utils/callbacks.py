@@ -20,56 +20,6 @@ class ExampleCallback(pl.Callback):
         print('Do something when training ends.')
 
 
-class SaveOnnxModelToWandbCallback(pl.Callback):
-    """
-        Save model in .onnx format and upload to wandb.
-        Might crash since not all models are compatible with onnx.
-    """
-    def __init__(self, datamodule, wandb_save_dir):
-        first_batch = next(iter(datamodule.train_dataloader()))
-        x, y = first_batch
-        self.dummy_input = x
-        self.wandb_save_dir = wandb_save_dir
-
-    def on_sanity_check_end(self, trainer, pl_module):
-        self.save_onnx_model(pl_module)
-
-    def on_train_end(self, trainer, pl_module):
-        self.save_onnx_model(pl_module)
-
-    def save_onnx_model(self, pl_module):
-        file_path = os.path.join(self.wandb_save_dir, "model.onnx")
-        pl_module.to_onnx(file_path=file_path, input_sample=self.dummy_input.to(pl_module.device))
-        wandb.save(file_path, base_path=self.wandb_save_dir)
-
-
-class ImagePredictionLoggerCallback(pl.Callback):
-    """
-        Each epoch upload to wandb a couple of the same images with predicted labels.
-    """
-    def __init__(self, datamodule, num_samples=8):
-        first_batch = next(iter(datamodule.train_dataloader()))
-        self.imgs, self.labels = first_batch
-        self.imgs, self.labels = self.imgs[:num_samples], self.labels[:num_samples]
-        self.ready = True
-
-    def on_sanity_check_end(self, trainer, pl_module):
-        """Start executing this callback only after all validation sanity checks end."""
-        self.ready = True
-
-    def on_validation_epoch_end(self, trainer, pl_module):
-        if self.ready:
-            imgs = self.imgs.to(device=pl_module.device)
-            logits = pl_module(imgs)
-            preds = torch.argmax(logits, -1)
-            trainer.logger.experiment.log({f"img_examples": [
-                wandb.Image(
-                    x,
-                    caption=f"Epoch: {trainer.current_epoch} Pred:{pred}, Label:{y}"
-                ) for x, pred, y in zip(imgs, preds, self.labels)
-            ]}, commit=False)
-
-
 class UnfreezeModelCallback(pl.Callback):
     """
         Unfreeze model after a few epochs.

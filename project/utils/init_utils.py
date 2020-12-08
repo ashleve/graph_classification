@@ -31,11 +31,49 @@ def init_data_module(hparams: dict) -> pl.LightningDataModule:
     return datamodule
 
 
-def init_main_callbacks(project_config: dict,
-                        run_config: dict,
-                        use_wandb: bool,
-                        wandb_save_dir: str) -> List[pl.Callback]:
-    """Initialize default callbacks."""
+def init_trainer(project_config: dict, run_config: dict, logger, callbacks: list) -> pl.Trainer:
+    """Initialize PyTorch Lightning Trainer"""
+
+    # Get path to checkpoint you want to resume with if it was set in the run config
+    resume_from_checkpoint = run_config.get("resume_training", {}).get("checkpoint_path", None)
+
+    trainer = pl.Trainer(
+        # whether to use gpu and how many
+        gpus=project_config["num_of_gpus"],
+
+        # experiment logging
+        logger=logger,
+
+        # useful callbacks
+        callbacks=callbacks,
+
+        # resume training from checkpoint if it was set in the run config
+        resume_from_checkpoint=resume_from_checkpoint
+        if resume_from_checkpoint != "None"
+        and resume_from_checkpoint != "False"
+        and resume_from_checkpoint is not False
+        else None,
+
+        # print related
+        progress_bar_refresh_rate=project_config["printing"]["progress_bar_refresh_rate"],
+        profiler=SimpleProfiler() if project_config["printing"]["profiler"] else None,
+        weights_summary=project_config["printing"]["weights_summary"],
+
+        # number of validation sanity checks
+        num_sanity_val_steps=3,
+
+        # default log dir if no logger is found
+        default_root_dir="logs/lightning_logs",
+
+        # insert all other trainer parameters specified in run config
+        **run_config["trainer"]
+    )
+
+    return trainer
+
+
+def init_callbacks(project_config: dict, run_config: dict, use_wandb: bool) -> List[pl.Callback]:
+    """Initialize default callbacks ana callbacks specified in run config."""
 
     callbacks = [
         ModelCheckpoint(
@@ -54,18 +92,12 @@ def init_main_callbacks(project_config: dict,
         callbacks.append(
             utils.callbacks.SaveCodeToWandbCallback(
                 base_dir=os.path.dirname(os.path.dirname(__file__)),
-                wandb_save_dir=wandb_save_dir,
+                wandb_save_dir=os.path.join(os.path.dirname(os.path.dirname(__file__)), "logs"),
                 run_config=run_config
             )
         )
 
-    return callbacks
-
-
-def init_custom_callbacks(callbacks_config) -> List[pl.Callback]:
-    """Initialize callbacks specified in run config."""
-
-    callbacks = []
+    callbacks_config = run_config.get("callbacks", {})
     for conf in callbacks_config:
         callback = getattr(utils.callbacks, conf)
         callbacks.append(callback(**callbacks_config[conf]))
@@ -133,47 +165,8 @@ def init_wandb_logger(project_config: dict,
     return wandb_logger
 
 
-def init_tensorboard_loggger() -> pl.loggers.TensorBoardLogger:
+def init_tensorboard_logger() -> pl.loggers.TensorBoardLogger:
     """TODO"""
     return None
 
 
-def init_trainer(project_config: dict, run_config: dict, logger, callbacks: list) -> pl.Trainer:
-    """Initialize PyTorch Lightning Trainer"""
-
-    # Get path to checkpoint you want to resume with if it was set in the run config
-    resume_from_checkpoint = run_config.get("resume_training", {}).get("checkpoint_path", None)
-
-    trainer = pl.Trainer(
-        # whether to use gpu and how many
-        gpus=project_config["num_of_gpus"],
-
-        # experiment logging
-        logger=logger,
-
-        # useful callbacks
-        callbacks=callbacks,
-
-        # resume training from checkpoint if it was set in the run config
-        resume_from_checkpoint=resume_from_checkpoint
-        if resume_from_checkpoint != "None"
-        and resume_from_checkpoint != "False"
-        and resume_from_checkpoint is not False
-        else None,
-
-        # print related
-        progress_bar_refresh_rate=project_config["printing"]["progress_bar_refresh_rate"],
-        profiler=SimpleProfiler() if project_config["printing"]["profiler"] else None,
-        weights_summary=project_config["printing"]["weights_summary"],
-
-        # number of validation sanity checks
-        num_sanity_val_steps=3,
-
-        # default log dir if no logger is found
-        default_root_dir="logs/lightning_logs",
-
-        # insert all other trainer parameters specified in run config
-        **run_config["trainer"]
-    )
-
-    return trainer
