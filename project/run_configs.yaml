@@ -165,6 +165,34 @@ GCN_MNIST_150:
         tags: []
 
 
+BASELINE_SUPERPIXEL_MNIST_CLASSIFIER:
+    trainer:
+        max_epochs: 50
+        gradient_clip_val: 0.5
+        accumulate_grad_batches: 1
+        limit_train_batches: 1.0
+    model:
+        model_folder: "graph_classifier"
+        lr: 0.001
+        weight_decay: 0.000001
+        num_node_features: 3
+        num_classes: 10
+        conv1_size: 32
+        conv2_size: 64
+        conv3_size: 512
+        pool_method: "max"
+        lin1_size: 64
+        dropout1: 0.25
+    dataset:
+        datamodule_folder: "mnist_superpixels"
+        num_nodes: "75"
+        batch_size: 32
+        train_val_split: [60_000, 10_000]
+    wandb:
+        group: "mnist_sp75"
+        tags: []
+
+
 BASELINE_PIXEL_MNIST_CLASSIFIER:
     trainer:
         min_epochs: 1

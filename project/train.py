@@ -68,7 +68,7 @@ def main(run_config_name: str, use_wandb: bool):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("-r", "--run_config", type=str, default="GCN_MNIST_75")
+    parser.add_argument("-r", "--run_config", type=str, default="BASELINE_PIXEL_MNIST_CLASSIFIER")
     parser.add_argument("-n", "--no_wandb", dest='use_wandb', action='store_false')
     parser.set_defaults(use_wandb=True)
     args = parser.parse_args()
