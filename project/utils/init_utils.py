@@ -73,7 +73,7 @@ def init_trainer(project_config: dict, run_config: dict, logger, callbacks: list
 
 
 def init_callbacks(project_config: dict, run_config: dict, use_wandb: bool) -> List[pl.Callback]:
-    """Initialize default callbacks ana callbacks specified in run config."""
+    """Initialize default callbacks and callbacks specified in run config."""
 
     callbacks = [
         ModelCheckpoint(

@@ -106,6 +106,11 @@ class ConfusionMatrixLoggerCallback(pl.Callback):
             self.preds = torch.cat(self.preds).tolist()
             self.targets = torch.cat(self.targets).tolist()
 
+            if not trainer or not trainer.logger or not trainer.logger.experiment:
+                self.preds = []
+                self.targets = []
+                return
+
             trainer.logger.experiment.log({
                 f"conf_mat{trainer.current_epoch}": wandb.plot.confusion_matrix(
                     self.preds,
