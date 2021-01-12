@@ -38,7 +38,7 @@ python train.py
 
 Or you can train model with chosen logger like Weights&Biases
 ```yaml
-# set project and entity names in project/configs/logger/wandb.yaml
+# set graph_classification and entity names in graph_classification/configs/logger/wandb.yaml
 wandb:
     args:
         project: "your_project_name"

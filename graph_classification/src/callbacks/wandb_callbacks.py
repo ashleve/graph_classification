@@ -17,7 +17,7 @@ class SaveCodeToWandb(Callback):
 
     def on_sanity_check_end(self, trainer, pl_module):
         """Upload files when all validation sanity checks end."""
-        code = wandb.Artifact('project-source', type='code')
+        code = wandb.Artifact('graph_classification-source', type='code')
         for path in glob.glob(os.path.join(self.code_dir, '**/*.py'), recursive=True):
             code.add_file(path)
         wandb.run.use_artifact(code)

@@ -3,12 +3,12 @@ from setuptools import setup, find_packages
 
 
 setup(
-    name='project',
+    name='graph_classification',
     version='0.0.0',
-    description='Describe Your Cool Project',
-    author='',
+    description='Graph classification tasks',
+    author='hobogalaxy',
     author_email='',
-    url='https://github.com/hobogalaxy/deep-learning-project-template',  # REPLACE WITH YOUR OWN GITHUB PROJECT LINK
+    url='https://github.com/hobogalaxy/graph-classification',
     install_requires=['pytorch-lightning', 'hydra-core'],
     packages=find_packages(),
 )
