@@ -16,10 +16,12 @@ class MNISTDataModule(LightningDataModule):
 
         self.data_dir = data_dir  # data_dir is specified in config.yaml
 
-        self.batch_size = args["batch_size"]
-        self.train_val_test_split = args["train_val_test_split"]
-        self.num_workers = args["num_workers"]
-        self.pin_memory = args["pin_memory"]
+        self.train_val_split_ratio = args.get("train_val_split_ratio") or 0.9
+        self.train_val_split = args.get("train_val_split") or None
+
+        self.batch_size = args.get("batch_size") or 32
+        self.num_workers = args.get("num_workers") or 1
+        self.pin_memory = args.get("pin_memory") or False
 
         self.transforms = transforms.ToTensor()
 
@@ -36,9 +38,14 @@ class MNISTDataModule(LightningDataModule):
         """Load data. Set variables: self.data_train, self.data_val, self.data_test."""
         trainset = MNIST(self.data_dir, train=True, transform=self.transforms)
         testset = MNIST(self.data_dir, train=False, transform=self.transforms)
-        dataset = ConcatDataset(datasets=[trainset, testset])
+        dataset_full = ConcatDataset(datasets=[trainset, testset])
 
-        self.data_train, self.data_val, self.data_test = random_split(dataset, self.train_val_test_split)
+        if not self.train_val_split:
+            train_length = int(len(dataset_full) * self.train_val_split_ratio)
+            val_length = len(dataset_full) - train_length
+            self.train_val_split = [train_length, val_length]
+
+        self.data_train, self.data_val = random_split(dataset_full, self.train_val_split)
 
     def train_dataloader(self):
         return DataLoader(dataset=self.data_train, batch_size=self.batch_size, num_workers=self.num_workers,
@@ -46,8 +53,4 @@ class MNISTDataModule(LightningDataModule):
 
     def val_dataloader(self):
         return DataLoader(dataset=self.data_val, batch_size=self.batch_size, num_workers=self.num_workers,
-                          pin_memory=self.pin_memory)
-
-    def test_dataloader(self):
-        return DataLoader(dataset=self.data_test, batch_size=self.batch_size, num_workers=self.num_workers,
                           pin_memory=self.pin_memory)
