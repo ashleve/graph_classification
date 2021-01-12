@@ -29,8 +29,12 @@ pip install -r requirements.txt
 
 pip install hydra-core --upgrade --pre
 ```
+Next, install pytorch geometric from the following instructions:<br>
+https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html
+<br>
 
-Next, you can train model with default configuration without logging
+
+Now you can train model with default configuration without logging
 ```bash
 cd project
 python train.py
@@ -38,7 +42,7 @@ python train.py
 
 Or you can train model with chosen logger like Weights&Biases
 ```yaml
-# set graph_classification and entity names in graph_classification/configs/logger/wandb.yaml
+# set project name and entity name in graph_classification/configs/logger/wandb.yaml
 wandb:
     args:
         project: "your_project_name"
