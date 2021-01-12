@@ -1,14 +1,16 @@
 <div align="center">    
  
-# Graph Classification Experiments
+# Graph Classification Experiments 
 
 [![Paper](http://img.shields.io/badge/paper-arxiv.1001.2234-B31B1B.svg)](https://www.nature.com/articles/nature14539)
+[![Conference](http://img.shields.io/badge/NeurIPS-2019-4b44ce.svg)](https://papers.nips.cc/book/advances-in-neural-information-processing-systems-31-2018)
+[![Conference](http://img.shields.io/badge/ICLR-2019-4b44ce.svg)](https://papers.nips.cc/book/advances-in-neural-information-processing-systems-31-2018)
 [![Conference](http://img.shields.io/badge/AnyConference-year-4b44ce.svg)](https://papers.nips.cc/book/advances-in-neural-information-processing-systems-31-2018)  
 
 </div>
 
-## Description   
-What it does   
+## Description
+What it does
 
 ## How to run
 First, install dependencies
@@ -22,70 +24,38 @@ conda update conda
 conda env create -f conda_env.yaml -n your_env_name
 conda activate your_env_name
 
-# optionally install project with setup.py
-pip install -e .
-
 # install requirements
 pip install -r requirements.txt
+
+pip install hydra-core --upgrade --pre
 ```
 
-Next, you can train model without logging
+Next, you can train model with default configuration without logging
 ```bash
-# train model without Weights&Biases
-# choose run config from project/run_configs.yaml
 cd project
-python train.py --no_wandb --run_config MNIST_CLASSIFIER_V1
+python train.py
 ```
 
-Or you can train model with Weights&Biases logging
+Or you can train model with chosen logger like Weights&Biases
 ```yaml
-# set project and enity names in project/project_config.yaml
-loggers:
-    wandb:
+# set project and entity names in project/configs/logger/wandb.yaml
+wandb:
+    args:
         project: "your_project_name"
-        entity: "your_wandb_username_or_team"
+        entity: "your_wandb_team_name"
 ```
 ```bash
 # train model with Weights&Biases
-# choose run config from project/run_configs.yaml
-cd project
-python train.py --run_config BASELINE_PIXEL_MNIST_CLASSIFIER
+python train.py logger=wandb.yaml
 ```
-<br>
 
+Or you can train model with chosen experiment config
+```bash
+python train.py +experiment=exp_example_simple.yaml
+```
 
-## Run config parameters ([run_configs.yaml](project/run_configs.yaml))
-You can store many run configurations in this file.<br>
-Example run configuration:
-```yaml
-BASELINE_PIXEL_MNIST_CLASSIFIER:
-    trainer:
-        min_epochs: 1
-        max_epochs: 3
-        gradient_clip_val: 0.5
-        accumulate_grad_batches: 1
-        limit_train_batches: 1.0
-    model:
-        model_folder: "baseline_pixel_mnist_classifier"
-        lr: 0.001
-        weight_decay: 0.000001
-        input_size: 784
-        output_size: 10
-        lin1_size: 256
-        lin2_size: 256
-        lin3_size: 128
-    dataset:
-        datamodule_folder: "mnist_pixels"
-        batch_size: 64
-        train_val_split: [60_000, 10_000]
-        num_workers: 1
-        pin_memory: False
-    wandb:
-        group: "mnist_pixels"
-        tags: []
-    resume_training:
-        checkpoint_path: None
-        wandb_run_id: None
-           
+Optionally you can install project as a package with [setup.py](setup.py)
+```bash
+pip install -e .
 ```
 <br>

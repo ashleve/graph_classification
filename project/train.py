@@ -1,76 +1,89 @@
-from pytorch_lightning.loggers import WandbLogger
-from argparse import ArgumentParser
+# pytorch lightning imports
+from pytorch_lightning.loggers import LightningLoggerBase
 import pytorch_lightning as pl
+import torch
+
+# hydra imports
+from omegaconf import DictConfig
+import hydra
+
+# normal imports
 from typing import List
-import yaml
-import os
+import wandb
 
-# utils
-from utils.init_utils import init_lit_model, init_data_module, init_trainer, init_callbacks, init_wandb_logger
+# template utils imports
+import template_utils.initializers as utils
 
 
-def train(project_config: dict, run_config: dict, use_wandb: bool):
+def train(config):
+    # Validate the correctness of loaded config
+    utils.validate_config(config=config)
+
+    # Set global PyTorch seed
+    if "seeds" in config and "pytorch_seed" in config["seeds"]:
+        torch.manual_seed(seed=config["seeds"]["pytorch_seed"])
+
     # Init PyTorch Lightning model ⚡
-    lit_model: pl.LightningModule = init_lit_model(hparams=run_config["model"])
-
-    # Init PyTorch Lightning datamodule ⚡
-    datamodule: pl.LightningDataModule = init_data_module(hparams=run_config["dataset"])
-
-    # Init Weights&Biases logger
-    logger: pl.loggers.WandbLogger = init_wandb_logger(
-        project_config=project_config,
-        run_config=run_config,
-        lit_model=lit_model,
-        datamodule=datamodule,
-        log_path=os.path.join(os.path.dirname(__file__), "logs/")
-    ) if use_wandb else None
-
-    # Init callbacks
-    callbacks: List[pl.Callback] = init_callbacks(
-        project_config=project_config,
-        run_config=run_config,
-        use_wandb=use_wandb
+    model: pl.LightningModule = utils.init_model(
+        model_config=config["model"],
+        optimizer_config=config["optimizer"]
     )
 
-    # Init PyTorch Lightning trainer ⚡
-    trainer: pl.Trainer = init_trainer(
-        project_config=project_config,
-        run_config=run_config,
-        logger=logger,
+    # Init PyTorch Lightning datamodule ⚡
+    datamodule: pl.LightningDataModule = utils.init_datamodule(
+        datamodule_config=config["datamodule"],
+        data_dir=config["data_dir"]
+    )
+
+    # Init PyTorch Lightning callbacks ⚡
+    callbacks = []
+    if "callbacks" in config:
+        callbacks: List[pl.Callback] = utils.init_callbacks(callbacks_config=config["callbacks"])
+
+    # Init PyTorch Lightning loggers ⚡
+    loggers = []
+    if "logger" in config:
+        loggers: List[pl.loggers.LightningLoggerBase] = utils.init_loggers(loggers_config=config["logger"])
+
+    # If WandbLogger was initialized, make it watch the model
+    utils.make_wandb_watch_model(loggers=loggers, model=model)
+
+    # Log to all loggers everything specified in 'extra_logs' section of config
+    utils.log_extra_hparams(
+        loggers=loggers,
+        config=config,
+        model=model,
+        datamodule=datamodule,
         callbacks=callbacks
     )
 
-    # Evaluate model on test set before training
-    # trainer.test(model=lit_model, datamodule=datamodule)
+    # Log info in terminal about all initialized objects
+    utils.show_init_info(model, datamodule, callbacks, loggers)
+
+    # Init PyTorch Lightning trainer ⚡
+    trainer: pl.Trainer = utils.init_trainer(
+        trainer_config=config["trainer"],
+        callbacks=callbacks,
+        loggers=loggers
+    )
+
+    # Automatically find learning rate if specified in config
+    if "auto_lr_find" in config["trainer"]["args"] and config["trainer"]["args"]["auto_lr_find"]:
+        utils.auto_find_lr(trainer, model, datamodule, loggers)
 
     # Train the model
-    trainer.fit(model=lit_model, datamodule=datamodule)
+    trainer.fit(model=model, datamodule=datamodule)
 
     # Evaluate model on test set after training
     trainer.test()
 
 
-def load_config(filename):
-    path = os.path.join(os.path.dirname(__file__), filename)
-    with open(path, "r") as ymlfile:
-        config = yaml.load(ymlfile, Loader=yaml.FullLoader)
-    return config
-
-
-def main(run_config_name: str, use_wandb: bool):
-    # Load configs
-    project_config: dict = load_config("project_config.yaml")
-    run_config: dict = load_config("run_configs.yaml")[run_config_name]
-
-    # Train model
-    train(project_config=project_config, run_config=run_config, use_wandb=use_wandb)
+@hydra.main(config_path="configs/", config_name="config.yaml")
+def main(config: DictConfig) -> None:
+    utils.show_config(config)  # print content of config
+    train(config)
+    wandb.finish()
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser()
-    parser.add_argument("-r", "--run_config", type=str, default="BASELINE_PIXEL_MNIST_CLASSIFIER")
-    parser.add_argument("-n", "--no_wandb", dest='use_wandb', action='store_false')
-    parser.set_defaults(use_wandb=True)
-    args = parser.parse_args()
-
-    main(run_config_name=args.run_config, use_wandb=args.use_wandb)
+    main()
