@@ -1,5 +1,5 @@
 from pytorch_lightning.metrics.classification import Accuracy
-from template_utils.initializers import load_class
+from src.utils.initializers import load_class
 import pytorch_lightning as pl
 import torch.nn.functional as F
 import torch
@@ -16,7 +16,14 @@ class GraphClassifier(pl.LightningModule):
         self.save_hyperparameters(hparams)
         self.optimizer_config = optimizer_config
 
-        self.model = GCN(hparams=self.hparams)
+        if self.hparams["architecture"] == "GCN":
+            self.model = GCN(hparams=self.hparams)
+        elif self.hparams["architecture"] == "GAT":
+            self.model = None
+        elif self.hparams["architecture"] == "GraphSAGE":
+            self.model = None
+        else:
+            raise Exception("No architecture defined!")
 
         self.accuracy = Accuracy()
 
@@ -30,7 +37,7 @@ class GraphClassifier(pl.LightningModule):
 
         # training metrics
         preds = torch.argmax(logits, dim=1)
-        acc = self.accuracy(preds, y)
+        acc = self.accuracy(preds, batch.y)
         self.log('train_loss', loss, on_step=False, on_epoch=True)
         self.log('train_acc', acc, on_step=False, on_epoch=True, prog_bar=True)
 
@@ -43,12 +50,12 @@ class GraphClassifier(pl.LightningModule):
 
         # training metrics
         preds = torch.argmax(logits, dim=1)
-        acc = self.accuracy(preds, y)
+        acc = self.accuracy(preds, batch.y)
         self.log('val_loss', loss, on_step=False, on_epoch=True)
         self.log('val_acc', acc, on_step=False, on_epoch=True, prog_bar=True)
 
         # we can return here anything and then read it in some callback
-        return {"batch_val_loss": loss, "batch_val_acc": acc, "batch_val_preds": preds, "batch_val_y": y}
+        return {"batch_val_loss": loss, "batch_val_acc": acc, "batch_val_preds": preds, "batch_val_y": batch.y}
 
     def configure_optimizers(self):
         Optimizer = load_class(self.optimizer_config["class"])

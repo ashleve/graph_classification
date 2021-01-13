@@ -8,7 +8,7 @@ class MNISTSuperpixelsDataModule(pl.LightningDataModule):
     def __init__(self, data_dir, **args):
         super().__init__()
 
-        self.data_dir = data_dir  # data_dir is specified in config.yaml
+        self.data_dir = data_dir + "/MNIST_superpixels"  # data_dir is specified in config.yaml
 
         self.train_val_split_ratio = args.get("train_val_split_ratio") or 0.9
         self.train_val_split = args.get("train_val_split") or None

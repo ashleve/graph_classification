@@ -1,6 +1,6 @@
 # @package _group_
 
-class: src.models.simple_mnist_classifier.SimplePixelMnistClassifier
+class: src.models.simple_pixel_mnist_classifier.SimplePixelMnistClassifier
 args:
     lr: 0.001
     weight_decay: 0.00001

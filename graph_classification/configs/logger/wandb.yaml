@@ -4,8 +4,8 @@
 wandb:
     class: pytorch_lightning.loggers.wandb.WandbLogger
     args:
-        project: "env_tests"
-#        entity: "team_name"  # set to name of your wandb team or just remove it
-        offline: False  # set True to store all logs only locally
+        project: "graph_classification_benchmarks"
+        entity: "lodz"
+        offline: False
         job_type: "train"
         save_dir: "."
