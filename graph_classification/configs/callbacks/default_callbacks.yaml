@@ -14,6 +14,6 @@ early_stopping:
     class: pytorch_lightning.callbacks.EarlyStopping
     args:
         monitor: "val_acc"      # name of the logged metric which determines when model is improving
-        patience: 100           # how many epochs of not improving until training stops
+        patience: 5             # how many epochs of not improving until training stops
         mode: "max"             # can be "max" or "min"
         min_delta: 0.0          # minimum change in the monitored metric needed to qualify as an improvement

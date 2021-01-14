@@ -10,12 +10,12 @@ class MnistSuperpixelsCustomDataModule(pl.LightningDataModule):
 
         self.data_dir = data_dir  # data_dir is specified in config.yaml
 
-        self.num_nodes = data_dir["num_nodes"]
-        if self.num_nodes == "75":
+        self.num_nodes = args["num_nodes"]
+        if self.num_nodes == "75" or self.num_nodes == 75:
             self.data_dir += "/MNIST_superpixels_75"
-        elif self.num_nodes == "150":
+        elif self.num_nodes == "150" or self.num_nodes == 150:
             self.data_dir += "/MNIST_superpixels_150"
-        elif self.num_nodes == "300":
+        elif self.num_nodes == "300" or self.num_nodes == 300:
             self.data_dir += "/MNIST_superpixels_300"
         else:
             raise Exception("Incorrect number of nodes")

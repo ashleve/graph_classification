@@ -58,6 +58,11 @@ Or you can train model with chosen experiment config
 python train.py +experiment=exp_example_simple.yaml
 ```
 
+To execute all experiments from folder run:
+```bash
+python train.py --multirun '+experiment/GCN_benchmarks=glob(*)' logger=wandb
+```
+
 Optionally you can install project as a package with [setup.py](setup.py)
 ```bash
 pip install -e .

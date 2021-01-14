@@ -29,13 +29,10 @@ hydra:
 # extra things that are logged by all loggers as hyperparameters
 extra_logs:
     log_seeds: True
-
     log_trainer_args: False
     log_datamodule_args: True
-
     log_model_class: True
     log_optimizer_class: True
     log_datamodule_class: True
     log_model_architecture_class: True
-
     log_train_val_test_sizes: True
