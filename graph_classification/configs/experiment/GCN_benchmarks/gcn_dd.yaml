@@ -49,6 +49,6 @@ optimizer:
 logger:
     wandb:
         args:
-            tags: ["GCN", "D&D"]
+            tags: ["D&D"]
             notes: ""
             group: ""

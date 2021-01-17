@@ -49,6 +49,6 @@ optimizer:
 logger:
     wandb:
         args:
-            tags: ["GCN", "triangles"]
+            tags: ["triangles"]
             notes: ""
             group: ""

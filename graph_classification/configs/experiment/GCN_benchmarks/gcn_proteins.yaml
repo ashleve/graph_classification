@@ -49,6 +49,6 @@ optimizer:
 logger:
     wandb:
         args:
-            tags: ["GCN", "proteins"]
+            tags: ["proteins"]
             notes: ""
             group: ""

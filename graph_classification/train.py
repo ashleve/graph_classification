@@ -16,9 +16,6 @@ import src.utils.initializers as utils
 
 
 def train(config):
-    # Validate the correctness of loaded config
-    utils.validate_config(config=config)
-
     # Set global PyTorch seed
     if "seeds" in config and "pytorch_seed" in config["seeds"]:
         torch.manual_seed(seed=config["seeds"]["pytorch_seed"])
@@ -68,8 +65,10 @@ def train(config):
     )
 
     # Automatically find learning rate if specified in config
-    if "auto_lr_find" in config["trainer"]["args"] and config["trainer"]["args"]["auto_lr_find"]:
-        utils.auto_find_lr(trainer, model, datamodule, loggers)
+    # if "auto_lr_find" in config["trainer"]["args"] and config["trainer"]["args"]["auto_lr_find"]:
+    #     utils.auto_find_lr(trainer, model, datamodule, loggers)
+
+    trainer.tune(model=model, datamodule=datamodule)
 
     # Train the model
     trainer.fit(model=model, datamodule=datamodule)

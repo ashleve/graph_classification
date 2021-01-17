@@ -1,7 +1,7 @@
 # @package _global_
 
 # to execute this experiment run:
-# python train.py logger=wandb +experiment/GCN_benchmarks=gcn_colors3
+# python train.py logger=wandb +experiment/GCN_benchmarks=gcn_mnist_superpixels
 
 defaults:
     - override /trainer: default_trainer.yaml
@@ -25,9 +25,9 @@ trainer:
 model:
     class: src.models.graph_classifier.GraphClassifier
     args:
-        architecture: GCN
-        num_node_features: 5
-        num_classes: 11
+        architecture: GAT
+        num_node_features: 1
+        num_classes: 10
         conv1_size: 32
         conv2_size: 64
         conv3_size: 512
@@ -36,19 +36,19 @@ model:
         dropout1: 0.25
 
 datamodule:
-    class: src.datamodules.colors3.ColorsDataModule
+    class: src.datamodules.mnist_superpixels.MNISTSuperpixelsDataModule
     args:
         batch_size: 32
         train_val_split_ratio: 0.9
 
 optimizer:
     args:
-        lr: 0.0001
+        lr: 0.001
         weight_decay: 0.000001
 
 logger:
     wandb:
         args:
-            tags: ["colors3"]
+            tags: ["mnist_superpixels_75", "no_position_features"]
             notes: ""
             group: ""

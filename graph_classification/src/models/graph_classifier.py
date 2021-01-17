@@ -6,6 +6,7 @@ import torch
 
 # import custom architectures
 from src.architectures.gcn import GCN
+from src.architectures.gat import GAT
 
 
 class GraphClassifier(pl.LightningModule):
@@ -19,7 +20,7 @@ class GraphClassifier(pl.LightningModule):
         if self.hparams["architecture"] == "GCN":
             self.model = GCN(hparams=self.hparams)
         elif self.hparams["architecture"] == "GAT":
-            self.model = None
+            self.model = GAT(hparams=self.hparams)
         elif self.hparams["architecture"] == "GraphSAGE":
             self.model = None
         else:

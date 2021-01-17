@@ -1,17 +1,17 @@
 from torch_geometric.nn import global_max_pool, global_mean_pool, global_add_pool
-from torch_geometric.nn import GCNConv
+from torch_geometric.nn import GATConv
 import torch.nn.functional as F
 from torch import nn
 
 
-class GCN(nn.Module):
+class GAT(nn.Module):
     def __init__(self, hparams):
         super().__init__()
         self.hparams = hparams
 
-        self.conv1 = GCNConv(hparams['num_node_features'], hparams['conv1_size'])
-        self.conv2 = GCNConv(hparams['conv1_size'], hparams['conv2_size'])
-        self.conv3 = GCNConv(hparams['conv2_size'], hparams['conv3_size'])
+        self.conv1 = GATConv(hparams['num_node_features'], hparams['conv1_size'], heads=1)
+        self.conv2 = GATConv(hparams['conv1_size'], hparams['conv2_size'], heads=1)
+        self.conv3 = GATConv(hparams['conv2_size'], hparams['conv3_size'], heads=1)
 
         self.linear1 = nn.Linear(hparams['conv3_size'], hparams['lin1_size'])
         self.dropout1 = nn.Dropout(p=hparams['dropout1'])

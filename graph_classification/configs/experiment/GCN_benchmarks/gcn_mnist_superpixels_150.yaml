@@ -44,12 +44,12 @@ datamodule:
 
 optimizer:
     args:
-        lr: 0.0001
+        lr: 0.001
         weight_decay: 0.000001
 
 logger:
     wandb:
         args:
-            tags: ["GCN", "mnist_superpixels_150"]
+            tags: ["mnist_superpixels_150"]
             notes: ""
             group: ""

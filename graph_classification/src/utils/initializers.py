@@ -182,6 +182,8 @@ def auto_find_lr(trainer, model, datamodule, loggers):
     lr_finder = trainer.tuner.lr_find(model=model, datamodule=datamodule)
     new_lr = lr_finder.suggestion()
 
+    log.info(new_lr)
+
     # Save lr plot
     fig = lr_finder.plot(suggest=True)
     fig.savefig("lr_loss_curve.jpg")
@@ -189,17 +191,16 @@ def auto_find_lr(trainer, model, datamodule, loggers):
     # Set new lr
     model.hparams.lr = new_lr
     log_hparams(loggers, {"lr": new_lr})
+    # log_hparams(loggers, {"y": new_lr})
+    # log_hparams(loggers, {"z": new_lr})
+    import wandb
+    api = wandb.Api()
+    run = api.run("<entity>/<project>/<run_id>")
+
+    wandb_logger = get_wandb_logger(loggers)
+    if wandb_logger:
+        wandb_logger.experiment.update()
 
 
 def show_config(config: DictConfig):
     log.info(f"\n{OmegaConf.to_yaml(config, resolve=True)}")
-
-
-def validate_config(config: dict):
-    # TODO
-    pass
-
-
-def validate_obj_config(obj_config: dict):
-    # TODO
-    pass

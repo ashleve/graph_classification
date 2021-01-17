@@ -1,7 +1,7 @@
 # @package _global_
 
 # to execute this experiment run:
-# python train.py logger=wandb +experiment/GCN_benchmarks=gcn_colors3
+# python train.py logger=wandb +experiment/GCN_benchmarks=gcn_triangles
 
 defaults:
     - override /trainer: default_trainer.yaml
@@ -25,8 +25,8 @@ trainer:
 model:
     class: src.models.graph_classifier.GraphClassifier
     args:
-        architecture: GCN
-        num_node_features: 5
+        architecture: GAT
+        num_node_features: 1
         num_classes: 11
         conv1_size: 32
         conv2_size: 64
@@ -36,7 +36,7 @@ model:
         dropout1: 0.25
 
 datamodule:
-    class: src.datamodules.colors3.ColorsDataModule
+    class: src.datamodules.triangles.TrianglesDataModule
     args:
         batch_size: 32
         train_val_split_ratio: 0.9
@@ -49,6 +49,6 @@ optimizer:
 logger:
     wandb:
         args:
-            tags: ["colors3"]
+            tags: ["triangles"]
             notes: ""
             group: ""

@@ -25,7 +25,7 @@ trainer:
 model:
     class: src.models.graph_classifier.GraphClassifier
     args:
-        architecture: GCN
+        architecture: GAT
         num_node_features: 5
         num_classes: 11
         conv1_size: 32

@@ -34,13 +34,13 @@ https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html
 <br>
 
 
-Now you can train model with default configuration without logging
+Now you can train model with default configuration without logging:
 ```bash
 cd project
 python train.py
 ```
 
-Or you can train model with chosen logger like Weights&Biases
+Or you can train model with chosen logger like Weights&Biases:
 ```yaml
 # set project name and entity name in graph_classification/configs/logger/wandb.yaml
 wandb:
@@ -50,20 +50,30 @@ wandb:
 ```
 ```bash
 # train model with Weights&Biases
-python train.py logger=wandb.yaml
+python train.py logger=wandb
 ```
 
-Or you can train model with chosen experiment config
+Or you can train model with chosen experiment config:
 ```bash
-python train.py +experiment=exp_example_simple.yaml
+python train.py +experiment/GCN_benchmarks=gcn_mnist_superpixels
 ```
 
-To execute all experiments from folder run:
+To execute all experiments from folder `graph_classification/configs/experiment/GCN_benchmarks/` run:
 ```bash
-python train.py --multirun '+experiment/GCN_benchmarks=glob(*)' logger=wandb
+python train.py --multirun '+experiment/GCN_benchmarks=glob(*)'
 ```
 
-Optionally you can install project as a package with [setup.py](setup.py)
+You can override any parameter from command line like this:
+```
+python train.py trainer.args.max_epochs=20 optimizer.args.lr=0.0005
+```
+
+Combaining it all:
+```
+python train.py --multirun '+experiment/GCN_benchmarks=glob(*)' trainer.args.max_epochs=100 logger=wandb
+```
+
+Optionally you can install project as a package with [setup.py](setup.py):
 ```bash
 pip install -e .
 ```
