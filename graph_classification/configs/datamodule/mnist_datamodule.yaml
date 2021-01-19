@@ -1,8 +1,0 @@
-# @package _group_
-
-class: src.datamodules.mnist_pixels.MNISTDataModule
-args:
-    batch_size: 64
-    train_val_test_split: [60_000, 10_000]
-    num_workers: 1
-    pin_memory: False

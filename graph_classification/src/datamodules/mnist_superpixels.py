@@ -5,17 +5,17 @@ import pytorch_lightning as pl
 
 
 class MNISTSuperpixelsDataModule(pl.LightningDataModule):
-    def __init__(self, data_dir, **args):
+    def __init__(self, *args, **kwargs):
         super().__init__()
 
-        self.data_dir = data_dir + "/MNIST_superpixels"  # data_dir is specified in config.yaml
+        self.data_dir = kwargs.get("data_dir") + "/MNIST_superpixels"  # data_dir is specified in config.yaml
 
-        self.train_val_split_ratio = args.get("train_val_split_ratio") or 0.9
-        self.train_val_split = args.get("train_val_split") or None
+        self.train_val_split_ratio = kwargs.get("train_val_split_ratio") or 0.9
+        self.train_val_split = kwargs.get("train_val_split") or None
 
-        self.batch_size = args.get("batch_size") or 32
-        self.num_workers = args.get("num_workers") or 1
-        self.pin_memory = args.get("pin_memory") or False
+        self.batch_size = kwargs.get("batch_size") or 32
+        self.num_workers = kwargs.get("num_workers") or 1
+        self.pin_memory = kwargs.get("pin_memory") or False
 
         self.transforms = None
 

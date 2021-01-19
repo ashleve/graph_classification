@@ -1,0 +1,3 @@
+# Neptune logger config
+neptune:
+    _target_: pytorch_lightning.logger.NeptuneLogger

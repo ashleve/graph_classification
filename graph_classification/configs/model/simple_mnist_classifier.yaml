@@ -1,9 +1,0 @@
-# @package _group_
-
-class: src.models.simple_pixel_mnist_classifier.SimplePixelMnistClassifier
-args:
-    input_size: 784
-    output_size: 10
-    lin1_size: 256
-    lin2_size: 256
-    lin3_size: 128

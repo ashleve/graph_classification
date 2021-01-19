@@ -1,5 +1,4 @@
 from pytorch_lightning.metrics.classification import Accuracy
-from src.utils.initializers import load_class
 import pytorch_lightning as pl
 import torch.nn.functional as F
 import torch
@@ -11,29 +10,26 @@ from src.architectures.gat import GAT
 
 class GraphClassifier(pl.LightningModule):
 
-    def __init__(self, model_config, optimizer_config):
+    def __init__(self, *args, **kwargs):
         super().__init__()
-        hparams = {**model_config["args"], **optimizer_config["args"]}
-        self.save_hyperparameters(hparams)
-        self.optimizer_config = optimizer_config
-
-        if self.hparams["architecture"] == "GCN":
-            self.model = GCN(hparams=self.hparams)
-        elif self.hparams["architecture"] == "GAT":
-            self.model = GAT(hparams=self.hparams)
-        elif self.hparams["architecture"] == "GraphSAGE":
-            self.model = None
-        else:
-            raise Exception("No architecture defined!")
-
+        self.save_hyperparameters()
         self.accuracy = Accuracy()
 
+        if self.hparams.architecture == "GCN":
+            self.architecture = GCN(hparams=self.hparams)
+        elif self.hparams.architecture == "GAT":
+            self.architecture = GAT(hparams=self.hparams)
+        elif self.hparams.architecture == "GraphSAGE":
+            self.architecture = None
+        else:
+            raise Exception("Invalid architecture name")
+
     def forward(self, x):
-        return self.model(x)
+        return self.architecture(x)
 
     # logic for a single training step
     def training_step(self, batch, batch_idx):
-        logits = self.model(batch)
+        logits = self.architecture(batch)
         loss = F.nll_loss(logits, batch.y.long())
 
         # training metrics
@@ -46,7 +42,7 @@ class GraphClassifier(pl.LightningModule):
 
     # logic for a single validation step
     def validation_step(self, batch, batch_idx):
-        logits = self.model(batch)
+        logits = self.architecture(batch)
         loss = F.nll_loss(logits, batch.y.long())
 
         # training metrics
@@ -59,5 +55,7 @@ class GraphClassifier(pl.LightningModule):
         return {"batch_val_loss": loss, "batch_val_acc": acc, "batch_val_preds": preds, "batch_val_y": batch.y}
 
     def configure_optimizers(self):
-        Optimizer = load_class(self.optimizer_config["class"])
-        return Optimizer(self.parameters(), **self.optimizer_config["args"])
+        if self.hparams.optimizer == "adam":
+            return torch.optim.Adam(self.parameters(), lr=self.hparams.lr, weight_decay=self.hparams.weight_decay)
+        else:
+            raise Exception("Invalid optimizer name")

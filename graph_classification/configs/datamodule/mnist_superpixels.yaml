@@ -1,0 +1,6 @@
+_target_: src.datamodules.mnist_superpixels.MNISTSuperpixelsDataModule
+data_dir: ${data_dir}
+train_val_split_ratio: 0.85
+batch_size: 32
+num_workers: 1
+pin_memory: False

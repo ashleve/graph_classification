@@ -1,11 +1,8 @@
-# @package _group_
-
 # Weights&Biases logger config
 wandb:
-    class: pytorch_lightning.loggers.wandb.WandbLogger
-    args:
-        project: "graph_classification_benchmarks"
-        entity: "lodz"
-        offline: False
-        job_type: "train"
-        save_dir: "."
+    _target_: pytorch_lightning.loggers.wandb.WandbLogger
+    project: "graph_classification_benchmarks"
+    entity: "lodz"                  # set to name of your wandb team or just remove it
+    offline: False              # set True to store all logs only locally
+    job_type: "train"
+    save_dir: "."

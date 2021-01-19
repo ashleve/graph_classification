@@ -1,13 +1,11 @@
-# @package _group_
-
-class: src.models.graph_classifier.GraphClassifier
-args:
-    architecture: GCN
-    num_node_features: 1
-    num_classes: 10
-    conv1_size: 32
-    conv2_size: 64
-    conv3_size: 512
-    pool_method: "max"
-    lin1_size: 64
-    dropout1: 0.25
+_target_: src.models.graph_classifier.GraphClassifier
+optimizer: adam
+architecture: GCN
+num_node_features: 1
+num_classes: 10
+conv1_size: 32
+conv2_size: 64
+conv3_size: 512
+pool_method: "max"
+lin1_size: 64
+dropout1: 0.25
