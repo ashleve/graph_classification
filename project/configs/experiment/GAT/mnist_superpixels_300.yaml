@@ -1,0 +1,49 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py logger=wandb +experiment/GAT_benchmarks=mnist_superpixels_300
+
+defaults:
+    - override /trainer: default_trainer.yaml
+    - override /model: null
+    - override /datamodule: null
+    - override /seeds: null
+    - override /callbacks: wandb_callbacks.yaml
+    - override /logger: wandb
+
+seeds:
+    pytorch_seed: 12345
+
+trainer:
+    min_epochs: 10
+    max_epochs: 100
+    accumulate_grad_batches: 1
+    gradient_clip_val: 0.5
+
+model:
+    _target_: src.models.graph_classifier.GraphClassifier
+    optimizer: adam
+    lr: 0.001
+    weight_decay: 0.000001
+    architecture: GAT
+    num_node_features: 3
+    num_classes: 10
+    conv1_size: 32
+    conv2_size: 64
+    conv3_size: 128
+    pool_method: max
+    lin1_size: 64
+    dropout1: 0.25
+
+datamodule:
+    _target_: src.datamodules.mnist_superpixels_custom.MnistSuperpixelsCustomDataModule
+    data_dir: ${data_dir}
+    num_nodes: "300"
+    batch_size: 32
+    train_val_split_ratio: 0.9
+
+logger:
+    wandb:
+        tags: ["mnist_superpixels_300"]
+        notes: ""
+        group: ""

@@ -225,7 +225,5 @@ ipython_config.py
 #   git rm -r .ipynb_checkpoints/
 
 .idea/
-graph_classification/data/
-graph_classification/lightning_logs/
-graph_classification/wandb/
-graph_classification/logs/
+project/data/
+project/logs/

@@ -1,0 +1,48 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py logger=wandb +experiment/GCN_benchmarks=triangles
+
+defaults:
+    - override /trainer: default_trainer.yaml
+    - override /model: null
+    - override /datamodule: null
+    - override /seeds: null
+    - override /callbacks: wandb_callbacks.yaml
+    - override /logger: wandb
+
+seeds:
+    pytorch_seed: 12345
+
+trainer:
+    min_epochs: 10
+    max_epochs: 100
+    accumulate_grad_batches: 1
+    gradient_clip_val: 0.5
+
+model:
+    _target_: src.models.graph_classifier.GraphClassifier
+    optimizer: adam
+    lr: 0.001
+    weight_decay: 0.000001
+    architecture: GCN
+    num_node_features: 1
+    num_classes: 11
+    conv1_size: 32
+    conv2_size: 64
+    conv3_size: 512
+    pool_method: max
+    lin1_size: 64
+    dropout1: 0.25
+
+datamodule:
+    _target_: src.datamodules.triangles.TrianglesDataModule
+    data_dir: ${data_dir}
+    batch_size: 32
+    train_val_split_ratio: 0.9
+
+logger:
+    wandb:
+        tags: ["triangles"]
+        notes: ""
+        group: ""

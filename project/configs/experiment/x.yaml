@@ -1,0 +1,58 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py logger=wandb +experiment/
+
+defaults:
+    - override /trainer: default_trainer.yaml
+    - override /model: null
+    - override /datamodule: null
+    - override /seeds: null
+    - override /callbacks: default_callbacks.yaml
+    - override /logger: csv_logger.yaml
+
+seeds:
+    pytorch_seed: 12345
+
+trainer:
+    min_epochs: 10
+    max_epochs: 100
+    accumulate_grad_batches: 1
+    gradient_clip_val: 0.5
+
+model:
+    _target_: src.models.ogbg_classifier.OGBGClassifier
+    architecture: GAT
+    optimizer: adam
+    lr: 0.001
+    weight_decay: 0.000005
+    dataset_name: ${datamodule.dataset_name}
+    node_features: ${datamodule.node_features}
+    classes: ${datamodule.classes}
+    conv1_size: 32
+    conv2_size: 64
+    conv3_size: 128
+    pool_method: max
+    lin1_size: 64
+    dropout1: 0.25
+
+datamodule:
+    _target_: src.datamodules.ogbg_molhiv.OGBGmolhiv
+    dataset_name: ogbg-molhiv
+    data_dir: ${data_dir}
+    batch_size: 32
+    node_features: 9
+    edge_features: 3
+    classes: 2
+
+logger:
+    wandb:
+        tags: ["ogbg-molhiv"]
+        notes: ""
+        group: ""
+
+callbacks:
+    model_checkpoint:
+        monitor: "val_rocauc"
+    early_stopping:
+        monitor: "val_rocauc"
