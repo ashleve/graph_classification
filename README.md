@@ -4,11 +4,12 @@
 Using PyTorch Lightning + Hydra to benchmark graph neural networks on graph classification datasets.<br>
 Built with [lightning-hydra-template](https://github.com/hobogalaxy/lightning-hydra-template).
 </div>
+<br>
 
 ## Description
 The following datasets have implemented [datamodules](project/src/datamodules) and [lightning models](project/src/models):
 - Image classification from graphs of superpixels (MNIST, FashionMNIST, CIFAR10)
-- [Open Graph Benchmarks](https://ogb.stanford.edu/docs/graphprop/): node property prediction (ogbg-molhiv, ogbg-molpcba, ogbg-ppa)
+- [Open Graph Benchmarks](https://ogb.stanford.edu/docs/graphprop/): graph property prediction (ogbg-molhiv, ogbg-molpcba, ogbg-ppa)
 
 ## How to run
 First, install dependencies
