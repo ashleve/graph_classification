@@ -7,52 +7,54 @@ defaults:
     - override /trainer: default_trainer.yaml
     - override /model: null
     - override /datamodule: null
-    - override /seeds: null
     - override /callbacks: default_callbacks.yaml
     - override /logger: csv_logger.yaml
 
-seeds:
-    pytorch_seed: 12345
+#seed: 1234
 
 trainer:
-    min_epochs: 10
+    min_epochs: 20
     max_epochs: 100
     accumulate_grad_batches: 1
     gradient_clip_val: 0.5
 
 model:
-    _target_: src.models.ogbg_classifier.OGBGClassifier
-    architecture: GAT
+    _target_: src.models.ogbg_molpcba_classifier.OGBGMolpcbaClassifier
+    architecture: GCN
     optimizer: adam
     lr: 0.001
-    weight_decay: 0.000005
-    dataset_name: ${datamodule.dataset_name}
-    node_features: ${datamodule.node_features}
-    classes: ${datamodule.classes}
-    conv1_size: 32
-    conv2_size: 64
-    conv3_size: 128
-    pool_method: max
-    lin1_size: 64
-    dropout1: 0.25
+    weight_decay: 0.0
+    node_emb_size: 100
+    edge_emb_size: 100
+    node_features: ${model.node_emb_size}
+    conv1_size: 256
+    conv2_size: 256
+    conv3_size: 512
+    pool_method: add
+    lin1_size: 128
+#    dropout1: 0.1
+#    dropout2: 0.1
+    lin2_size: 32
+    output_size: ${datamodule.classes}
 
 datamodule:
-    _target_: src.datamodules.ogbg_molhiv.OGBGmolhiv
-    dataset_name: ogbg-molhiv
+    _target_: src.datamodules.ogbg_molpcba.OGBGMolpcba
     data_dir: ${data_dir}
     batch_size: 32
     node_features: 9
     edge_features: 3
-    classes: 2
+    classes: 128
 
 logger:
     wandb:
-        tags: ["ogbg-molhiv"]
+        tags: ["ogbg-molpcba"]
         notes: ""
         group: ""
 
 callbacks:
     model_checkpoint:
-        monitor: "val_rocauc"
+        monitor: "val_ap"
+        mode: "max"
     early_stopping:
-        monitor: "val_rocauc"
+        monitor: "val_loss"
+        mode: "min"

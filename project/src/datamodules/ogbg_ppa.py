@@ -4,7 +4,7 @@ import pytorch_lightning as pl
 import torch
 
 
-class OGBGMolhiv(pl.LightningDataModule):
+class OGBGPpa(pl.LightningDataModule):
     def __init__(self, *args, **kwargs):
         super().__init__()
 
@@ -24,11 +24,11 @@ class OGBGMolhiv(pl.LightningDataModule):
     def prepare_data(self):
         """Download data if needed. This method is called only from a single GPU.
         Do not use it to assign state (self.x = y). Pretransform is applied before saving dataset on disk."""
-        PygGraphPropPredDataset(name="ogbg-molhiv", root=self.data_dir, pre_transform=self.pre_transform)
+        PygGraphPropPredDataset(name="ogbg-ppa", root=self.data_dir, pre_transform=self.pre_transform)
 
     def setup(self, stage=None):
         """Load data. Set variables: self.data_train, self.data_val, self.data_test."""
-        dataset = PygGraphPropPredDataset(name="ogbg-molhiv", root=self.data_dir, transform=self.transform)
+        dataset = PygGraphPropPredDataset(name="ogbg-ppa", root=self.data_dir, transform=self.transform)
         split_idx = dataset.get_idx_split()
         self.data_train = dataset[split_idx["train"]]
         self.data_val = dataset[split_idx["valid"]]

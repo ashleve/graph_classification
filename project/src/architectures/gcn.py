@@ -14,8 +14,10 @@ class GCN(nn.Module):
         self.conv3 = GCNConv(hparams['conv2_size'], hparams['conv3_size'])
 
         self.linear1 = nn.Linear(hparams['conv3_size'], hparams['lin1_size'])
-        self.dropout1 = nn.Dropout(p=hparams['dropout1'])
-        self.linear2 = nn.Linear(hparams['lin1_size'], hparams['classes'])
+        # self.dropout1 = nn.Dropout(p=hparams['dropout1'])
+        self.linear2 = nn.Linear(hparams['lin1_size'], hparams['lin2_size'])
+        # self.dropout2 = nn.Dropout(p=hparams['dropout2'])
+        self.linear3 = nn.Linear(hparams['lin2_size'], hparams['output_size'])
 
     def forward(self, data):
         x, edge_index = data.x, data.edge_index
@@ -36,7 +38,10 @@ class GCN(nn.Module):
 
         x = self.linear1(x)
         x = F.relu(x)
-        x = self.dropout1(x)
+        # self.dropout1(x)
         x = self.linear2(x)
+        x = F.relu(x)
+        # self.dropout2(x)
+        x = self.linear3(x)
 
-        return F.log_softmax(x, dim=0)
+        return x

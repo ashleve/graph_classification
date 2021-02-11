@@ -5,7 +5,6 @@ defaults:
     - trainer: default_trainer.yaml
     - model: graph_classifier.yaml
     - datamodule: mnist_superpixels.yaml
-    - seeds: default_seeds.yaml  # set this to null if you don't want to use seeds
     - callbacks: default_callbacks.yaml  # set this to null if you don't want to use callbacks
     - logger: csv_logger.yaml  # set logger here or use command line (e.g. `python train.py logger=wandb`)
 

@@ -62,11 +62,13 @@ def log_hparams(config, model, datamodule, callbacks, loggers, trainer):
         obj = model.architecture
         hparams["_class_model_architecture"] = obj.__module__ + "." + obj.__class__.__name__
 
-    hparams.update(config["seeds"])
     hparams.update(config["model"])
     hparams.update(config["datamodule"])
     hparams.update(config["trainer"])
     hparams.pop("_target_")
+
+    if "seed" in config:
+        hparams.update({"seed": config["seed"]})
 
     hparams["datamodule"] = datamodule.__class__.__name__
 
@@ -76,6 +78,10 @@ def log_hparams(config, model, datamodule, callbacks, loggers, trainer):
         hparams["val_size"] = len(datamodule.data_val)
     if hasattr(datamodule, 'data_test') and datamodule.data_test is not None:
         hparams["test_size"] = len(datamodule.data_test)
+
+    hparams["#params_total"] = sum(p.numel() for p in model.parameters())
+    hparams["#params_trainable"] = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    hparams["#params_not_trainable"] = sum(p.numel() for p in model.parameters() if not p.requires_grad)
 
     send_hparams_to_loggers(loggers=loggers, hparams=hparams)
 
