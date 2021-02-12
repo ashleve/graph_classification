@@ -99,11 +99,17 @@ def train(config):
     # Finish run
     utils.finish()
 
+    # Return best metric score for optuna
+    return trainer.callback_metrics["val_rocauc_best"]
+
 
 @hydra.main(config_path="configs/", config_name="config.yaml")
 def main(config: DictConfig):
-    utils.print_config(config)
-    train(config)
+    utils.print_config(config["model"])
+    utils.print_config(config["datamodule"])
+    utils.print_config(config["trainer"])
+    metric = train(config)
+    return metric
 
 
 if __name__ == "__main__":

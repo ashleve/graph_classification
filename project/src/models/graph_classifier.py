@@ -93,7 +93,7 @@ class GraphClassifier(pl.LightningModule):
         self.train_acc_hist.append(self.trainer.callback_metrics["train_acc"])
         self.train_loss_hist.append(self.trainer.callback_metrics["train_loss"])
         self.log("train_acc_best", max(self.train_acc_hist), prog_bar=True)
-        self.log("train_loss_best", min(self.train_acc_hist), prog_bar=False)
+        self.log("train_loss_best", min(self.train_loss_hist), prog_bar=False)
 
     def validation_epoch_end(self, outputs):
         self.val_acc_hist.append(self.trainer.callback_metrics["val_acc"])

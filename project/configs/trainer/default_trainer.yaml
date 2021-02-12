@@ -5,3 +5,4 @@ gradient_clip_val: 0.5
 progress_bar_refresh_rate: 10
 weights_summary: null  # null in yaml represents python None value
 default_root_dir: "lightning_logs/"
+num_sanity_val_steps: 0

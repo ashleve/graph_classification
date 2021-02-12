@@ -81,17 +81,17 @@ class OGBGMolhivClassifier(pl.LightningModule):
     def training_epoch_end(self, outputs):
         rocauc = self.calculate_metric(outputs)
         self.train_rocauc_hist.append(rocauc)
+        self.train_loss_hist.append(self.trainer.callback_metrics["train_loss"])
         self.log("train_rocauc", rocauc, prog_bar=True)
         self.log("train_rocauc_best", max(self.train_rocauc_hist), prog_bar=True)
-        self.train_loss_hist.append(self.trainer.callback_metrics["train_loss"])
         self.log("train_loss_best", min(self.train_loss_hist), prog_bar=False)
 
     def validation_epoch_end(self, outputs):
         rocauc = self.calculate_metric(outputs)
         self.val_rocauc_hist.append(rocauc)
+        self.val_loss_hist.append(self.trainer.callback_metrics["val_loss"])
         self.log("val_rocauc", rocauc, prog_bar=True)
         self.log("val_rocauc_best", max(self.val_rocauc_hist), prog_bar=True)
-        self.val_loss_hist.append(self.trainer.callback_metrics["val_loss"])
         self.log("val_loss_best", min(self.val_loss_hist), prog_bar=False)
 
     def test_epoch_end(self, outputs):
