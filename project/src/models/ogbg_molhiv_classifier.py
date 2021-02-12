@@ -28,8 +28,11 @@ class OGBGMolhivClassifier(pl.LightningModule):
 
         self.criterion = torch.nn.BCEWithLogitsLoss()
         self.evaluator = Evaluator(name="ogbg-molhiv")
+
         self.train_rocauc_hist = []
+        self.train_loss_hist = []
         self.val_rocauc_hist = []
+        self.val_loss_hist = []
 
     def forward(self, batch):
         batch.x = self.atom_encoder(batch.x)
@@ -65,7 +68,7 @@ class OGBGMolhivClassifier(pl.LightningModule):
         y_true = batch.y.view(y_pred.shape)
 
         # training metrics
-        self.log('test_loss', loss, on_step=False, on_epoch=True)
+        self.log('test_loss', loss, on_step=False, on_epoch=True, prog_bar=False)
 
         return {"loss": loss, "y_pred": y_pred, "y_true": y_true}
 
@@ -80,12 +83,16 @@ class OGBGMolhivClassifier(pl.LightningModule):
         self.train_rocauc_hist.append(rocauc)
         self.log("train_rocauc", rocauc, prog_bar=True)
         self.log("train_rocauc_best", max(self.train_rocauc_hist), prog_bar=True)
+        self.train_loss_hist.append(self.trainer.callback_metrics["train_loss"])
+        self.log("train_loss_best", min(self.train_loss_hist), prog_bar=False)
 
     def validation_epoch_end(self, outputs):
         rocauc = self.calculate_metric(outputs)
         self.val_rocauc_hist.append(rocauc)
         self.log("val_rocauc", rocauc, prog_bar=True)
         self.log("val_rocauc_best", max(self.val_rocauc_hist), prog_bar=True)
+        self.val_loss_hist.append(self.trainer.callback_metrics["val_loss"])
+        self.log("val_loss_best", min(self.val_loss_hist), prog_bar=False)
 
     def test_epoch_end(self, outputs):
         self.log("test_rocauc", self.calculate_metric(outputs), prog_bar=False)

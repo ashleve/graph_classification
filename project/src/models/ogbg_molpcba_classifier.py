@@ -27,10 +27,12 @@ class OGBGMolpcbaClassifier(pl.LightningModule):
             raise Exception("Invalid architecture name")
 
         self.criterion = torch.nn.BCEWithLogitsLoss()
-
         self.evaluator = Evaluator(name="ogbg-molpcba")
+
         self.train_ap_hist = []
+        self.train_loss_hist = []
         self.val_ap_hist = []
+        self.val_loss_hist = []
 
     def forward(self, batch):
         batch.x = self.atom_encoder(batch.x)  # x is input atom feature
@@ -39,51 +41,46 @@ class OGBGMolpcbaClassifier(pl.LightningModule):
 
     # logic for a single training step
     def training_step(self, batch, batch_idx):
-        y_pred = self.forward(batch)
-
-        y_pred_nans = torch.sum(y_pred != y_pred)
-        y_true_nans = torch.sum(batch.y != batch.y)
-        self.log("y_pred_NaNs", y_pred_nans, reduce_fx=torch.sum, on_step=False, on_epoch=True, prog_bar=False)
-        self.log("y_true_NaNs", y_true_nans, reduce_fx=torch.sum, on_step=False, on_epoch=True, prog_bar=False)
-        # print("--------------------------")
-        # print("y_pred_NaNs:")
-        # print(y_pred_nans.shape)
-        # print(y_pred_nans)
-        # print("is_labeled_NaNs:")
-        # print(y_true_nans.shape)
-        # print(y_true_nans)
-        # print("--------------------------")
-
+        logits = self.forward(batch)
         is_labeled_idx = batch.y == batch.y
-        loss = self.criterion(y_pred[is_labeled_idx], batch.y.to(torch.float32)[is_labeled_idx])
-        y_true = batch.y.view(y_pred.shape)
+        loss = self.criterion(logits[is_labeled_idx], batch.y.to(torch.float32)[is_labeled_idx])
 
         # training metrics
+        y_pred = logits
+        y_true = batch.y.view(y_pred.shape)
         self.log('train_loss', loss, on_step=False, on_epoch=True, prog_bar=False)
+
+        # log number of NaNs
+        # y_pred_nans = torch.sum(logits != logits)
+        # y_true_nans = torch.sum(batch.y != batch.y)
+        # self.log("y_pred_NaNs", y_pred_nans, reduce_fx=torch.sum, on_step=False, on_epoch=True, prog_bar=False)
+        # self.log("y_true_NaNs", y_true_nans, reduce_fx=torch.sum, on_step=False, on_epoch=True, prog_bar=False)
 
         return {"loss": loss, "y_pred": y_pred, "y_true": y_true}
 
     # logic for a single validation step
     def validation_step(self, batch, batch_idx):
-        y_pred = self.forward(batch)
+        logits = self.forward(batch)
         is_labeled_idx = batch.y == batch.y
-        loss = self.criterion(y_pred[is_labeled_idx], batch.y.to(torch.float32)[is_labeled_idx])
-        y_true = batch.y.view(y_pred.shape)
+        loss = self.criterion(logits[is_labeled_idx], batch.y.to(torch.float32)[is_labeled_idx])
 
         # training metrics
+        y_pred = logits
+        y_true = batch.y.view(y_pred.shape)
         self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=False)
 
         return {"loss": loss, "y_pred": y_pred, "y_true": y_true}
 
     # logic for a single test step
     def test_step(self, batch, batch_idx):
-        y_pred = self.forward(batch)
+        logits = self.forward(batch)
         is_labeled_idx = batch.y == batch.y
-        loss = self.criterion(y_pred[is_labeled_idx], batch.y.to(torch.float32)[is_labeled_idx])
-        y_true = batch.y.view(y_pred.shape)
+        loss = self.criterion(logits[is_labeled_idx], batch.y.to(torch.float32)[is_labeled_idx])
 
         # training metrics
-        self.log('test_loss', loss, on_step=False, on_epoch=True)
+        y_pred = logits
+        y_true = batch.y.view(y_pred.shape)
+        self.log('test_loss', loss, on_step=False, on_epoch=True, prog_bar=False)
 
         return {"loss": loss, "y_pred": y_pred, "y_true": y_true}
 
@@ -96,14 +93,18 @@ class OGBGMolpcbaClassifier(pl.LightningModule):
     def training_epoch_end(self, outputs):
         ap = self.calculate_metric(outputs)
         self.train_ap_hist.append(ap)
+        self.train_loss_hist.append(self.trainer.callback_metrics["train_loss"])
         self.log("train_ap", ap, prog_bar=True)
         self.log("train_ap_best", max(self.train_ap_hist), prog_bar=True)
+        self.log("train_loss_best", min(self.train_loss_hist), prog_bar=False)
 
     def validation_epoch_end(self, outputs):
         ap = self.calculate_metric(outputs)
         self.val_ap_hist.append(ap)
+        self.val_loss_hist.append(self.trainer.callback_metrics["val_loss"])
         self.log("val_ap", ap, prog_bar=True)
         self.log("val_ap_best", max(self.val_ap_hist), prog_bar=True)
+        self.log("val_loss_best", min(self.val_loss_hist), prog_bar=False)
 
     def test_epoch_end(self, outputs):
         self.log("test_ap", self.calculate_metric(outputs), prog_bar=False)

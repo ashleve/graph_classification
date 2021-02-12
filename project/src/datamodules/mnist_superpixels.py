@@ -8,9 +8,9 @@ class MNISTSuperpixelsDataModule(pl.LightningDataModule):
     def __init__(self, *args, **kwargs):
         super().__init__()
 
-        self.data_dir = kwargs.get("data_dir") + "/MNIST_superpixels"  # data_dir is specified in config.yaml
+        self.data_dir = kwargs.get("data_dir") + "/MNIST_superpixels"
 
-        self.train_val_test_split_ratio = kwargs.get("train_val_test_split_ratio") or 0.9
+        self.train_val_test_split_ratio = kwargs.get("train_val_test_split_ratio") or [0.85, 0.10, 0.05]
         self.train_val_test_split = kwargs.get("train_val_test_split") or None
 
         self.batch_size = kwargs.get("batch_size") or 32
@@ -24,8 +24,10 @@ class MNISTSuperpixelsDataModule(pl.LightningDataModule):
         self.data_test = None
 
     def prepare_data(self):
-        """Download data if needed. This method is called only from a single GPU."""
-        pass
+        """Download data if needed. This method is called only from a single GPU.
+        Do not use it to assign state (self.x = y). Pretransform is applied before saving dataset on disk."""
+        MNISTSuperpixels(self.data_dir, train=True, pre_transform=self.transforms)
+        MNISTSuperpixels(self.data_dir, train=False, pre_transform=self.transforms)
 
     def setup(self, stage=None):
         """Load data. Set variables: self.data_train, self.data_val, self.data_test."""

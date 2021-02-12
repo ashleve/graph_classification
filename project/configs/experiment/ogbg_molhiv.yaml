@@ -10,7 +10,7 @@ defaults:
     - override /callbacks: default_callbacks.yaml
     - override /logger: csv_logger.yaml
 
-#seed: 1234
+seed: 1234
 
 trainer:
     min_epochs: 1

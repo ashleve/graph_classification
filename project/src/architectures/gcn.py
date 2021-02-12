@@ -35,6 +35,8 @@ class GCN(nn.Module):
             x = global_mean_pool(x, data.batch)
         elif self.hparams['pool_method'] == 'max':
             x = global_max_pool(x, data.batch)
+        else:
+            raise Exception("Invalid pooling method")
 
         x = self.linear1(x)
         x = F.relu(x)

@@ -36,7 +36,7 @@ class GraphClassifier(pl.LightningModule):
 
     # logic for a single training step
     def training_step(self, batch, batch_idx):
-        logits = self.architecture(batch)
+        logits = self.forward(batch)
         loss = self.criterion(logits, batch.y)
 
         # training metrics
@@ -48,15 +48,15 @@ class GraphClassifier(pl.LightningModule):
 
         # log number of NaNs
         # y_pred_nans = torch.sum(logits != logits)
-        # y_true_nans = torch.sum(y_true != y_true)
+        # y_true_nans = torch.sum(batch.y != batch.y)
         # self.log("y_pred_NaNs", y_pred_nans, reduce_fx=torch.sum, on_step=False, on_epoch=True, prog_bar=False)
         # self.log("y_true_NaNs", y_true_nans, reduce_fx=torch.sum, on_step=False, on_epoch=True, prog_bar=False)
 
-        return loss
+        return {"loss": loss, "y_pred": y_pred, "y_true": y_true}
 
     # logic for a single validation step
     def validation_step(self, batch, batch_idx):
-        logits = self.architecture(batch)
+        logits = self.forward(batch)
         loss = self.criterion(logits, batch.y)
 
         # training metrics
@@ -71,14 +71,15 @@ class GraphClassifier(pl.LightningModule):
 
     # logic for a single test step
     def test_step(self, batch, batch_idx):
-        logits = self.architecture(batch)
+        logits = self.forward(batch)
         loss = self.criterion(logits, batch.y)
 
         # training metrics
-        preds = torch.argmax(logits, dim=1)
-        acc = self.accuracy(preds, batch.y)
+        y_pred = torch.argmax(logits, dim=1)
+        y_true = batch.y
+        acc = self.accuracy(y_pred, y_true)
         self.log('test_loss', loss, on_step=False, on_epoch=True, prog_bar=False)
-        self.log('test_acc', acc, on_step=False, on_epoch=True, prog_bar=True)
+        self.log('test_acc', acc, on_step=False, on_epoch=True, prog_bar=False)
 
         return loss
 
