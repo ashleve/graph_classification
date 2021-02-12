@@ -15,8 +15,8 @@ The following datasets have implemented [datamodules](project/src/datamodules) a
 First, install dependencies
 ```bash
 # clone project
-git clone https://github.com/YourGithubName/your-repo-name
-cd your-repo-name
+git clone https://github.com/hobogalaxy/graph_classification
+cd graph_classification
 
 # optionally create conda environment
 conda update conda
@@ -55,13 +55,13 @@ Or you can train model with chosen experiment config:<br>
 <b>(Other superpixel experiments require to firstly generate dataset with 
 [superpixels_dataset_generation.ipynb](project/notebooks/superpixels_dataset_generation.ipynb))</b>
 ```bash
-python train.py +experiment/GCN_benchmarks=gcn_mnist_superpixels
+python train.py +experiment/GCN=mnist_superpixels
 ```
 <br>
 
-To execute all experiments from folder `graph_classification/configs/experiment/GCN_benchmarks/` run:
+To execute all experiments from folder `graph_classification/configs/experiment/GCN/` run:
 ```bash
-python train.py --multirun '+experiment/GCN_benchmarks=glob(*)'
+python train.py --multirun '+experiment/GCN=glob(*)'
 ```
 
 You can override any parameter from command line like this:
@@ -71,7 +71,7 @@ python train.py trainer.max_epochs=20 optimizer.lr=0.0005
 
 Combaining it all:
 ```
-python train.py --multirun '+experiment/GCN_benchmarks=glob(*)' trainer.max_epochs=10 logger=wandb
+python train.py --multirun '+experiment/GCN=glob(*)' trainer.max_epochs=10 logger=wandb
 ```
 
 Optionally you can install project as a package with [setup.py](setup.py):

@@ -25,7 +25,7 @@ model:
     lr: 0.001
     weight_decay: 0.0
     node_emb_size: 100
-    edge_emb_size: 100
+#    edge_emb_size: 100
     node_features: ${model.node_emb_size}
     conv1_size: 256
     conv2_size: 256

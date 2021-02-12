@@ -1,15 +1,14 @@
 # @package _global_
 
 # to execute this experiment run:
-# python train.py logger=wandb +experiment/GCN_benchmarks=colors3
+# python train.py logger=wandb +experiment/GCN_benchmarks=dd
 
 defaults:
     - override /trainer: default_trainer.yaml
     - override /model: null
     - override /datamodule: null
-    - override /seeds: null
-    - override /callbacks: wandb_callbacks.yaml
-    - override /logger: wandb
+    - override /callbacks: default_callbacks.yaml
+    - override /logger: csv_logger.yaml
 
 seeds:
     pytorch_seed: 12345
@@ -26,23 +25,25 @@ model:
     lr: 0.001
     weight_decay: 0.000001
     architecture: GCN
-    num_node_features: 5
-    num_classes: 11
-    conv1_size: 32
-    conv2_size: 64
+    node_features: ${datamodule.node_features}
+    conv1_size: 64
+    conv2_size: 128
     conv3_size: 512
     pool_method: max
-    lin1_size: 64
-    dropout1: 0.25
+    lin1_size: 128
+    lin2_size: 64
+    output_size: ${datamodule.classes}
 
 datamodule:
-    _target_: src.datamodules.colors3.ColorsDataModule
+    _target_: src.datamodules.dd.DDDataModule
     data_dir: ${data_dir}
     batch_size: 32
     train_val_split_ratio: 0.9
+    node_features: 89
+    classes: 2
 
 logger:
     wandb:
-        tags: ["colors3"]
+        tags: ["D&D"]
         notes: ""
         group: ""

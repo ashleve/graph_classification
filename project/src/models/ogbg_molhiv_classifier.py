@@ -15,7 +15,7 @@ class OGBGMolhivClassifier(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
         self.atom_encoder = AtomEncoder(emb_dim=self.hparams.node_emb_size)
-        self.bond_encoder = BondEncoder(emb_dim=self.hparams.edge_emb_size)
+        # self.bond_encoder = BondEncoder(emb_dim=self.hparams.edge_emb_size)
 
         if self.hparams.architecture == "GCN":
             self.architecture = GCN(hparams=self.hparams)
@@ -27,12 +27,13 @@ class OGBGMolhivClassifier(pl.LightningModule):
             raise Exception("Invalid architecture name")
 
         self.criterion = torch.nn.BCEWithLogitsLoss()
-
         self.evaluator = Evaluator(name="ogbg-molhiv")
+        self.train_rocauc_hist = []
+        self.val_rocauc_hist = []
 
     def forward(self, batch):
-        batch.x = self.atom_encoder(batch.x)  # x is input atom feature
-        # batch.edge_attr = self.bond_encoder(batch.edge_attr)  # edge_attr is input edge feature
+        batch.x = self.atom_encoder(batch.x)
+        # batch.edge_attr = self.bond_encoder(batch.edge_attr)
         return self.architecture(batch)
 
     # logic for a single training step
@@ -42,7 +43,7 @@ class OGBGMolhivClassifier(pl.LightningModule):
         y_true = batch.y.view(y_pred.shape)
 
         # training metrics
-        self.log('train_loss', loss, on_step=False, on_epoch=True, prog_bar=True)
+        self.log('train_loss', loss, on_step=False, on_epoch=True, prog_bar=False)
 
         return {"loss": loss, "y_pred": y_pred, "y_true": y_true}
 
@@ -53,7 +54,7 @@ class OGBGMolhivClassifier(pl.LightningModule):
         y_true = batch.y.view(y_pred.shape)
 
         # training metrics
-        self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=True)
+        self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=False)
 
         return {"loss": loss, "y_pred": y_pred, "y_true": y_true}
 
@@ -75,15 +76,21 @@ class OGBGMolhivClassifier(pl.LightningModule):
             raise Exception("Invalid optimizer name")
 
     def training_epoch_end(self, outputs):
-        self.log("train_rocauc", self.calculate_rocauc(outputs), prog_bar=True)
+        rocauc = self.calculate_metric(outputs)
+        self.train_rocauc_hist.append(rocauc)
+        self.log("train_rocauc", rocauc, prog_bar=True)
+        self.log("train_rocauc_best", max(self.train_rocauc_hist), prog_bar=True)
 
     def validation_epoch_end(self, outputs):
-        self.log("val_rocauc", torch.as_tensor(self.calculate_rocauc(outputs)), prog_bar=True)
+        rocauc = self.calculate_metric(outputs)
+        self.val_rocauc_hist.append(rocauc)
+        self.log("val_rocauc", rocauc, prog_bar=True)
+        self.log("val_rocauc_best", max(self.val_rocauc_hist), prog_bar=True)
 
     def test_epoch_end(self, outputs):
-        self.log("test_rocauc", self.calculate_rocauc(outputs), prog_bar=False)
+        self.log("test_rocauc", self.calculate_metric(outputs), prog_bar=False)
 
-    def calculate_rocauc(self, outputs):
+    def calculate_metric(self, outputs):
         y_true = torch.cat([x["y_true"] for x in outputs], dim=0)
         y_pred = torch.cat([x["y_pred"] for x in outputs], dim=0)
         result_dict = self.evaluator.eval({"y_true": y_true, "y_pred": y_pred})

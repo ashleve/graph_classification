@@ -17,7 +17,7 @@ class ProteinsDataModule(pl.LightningDataModule):
         assert 1 <= self.fold <= self.num_splits, "incorrect fold number"
 
         self.batch_size = args.get("batch_size") or 32
-        self.num_workers = args.get("num_workers") or 1
+        self.num_workers = args.get("num_workers") or 0
         self.pin_memory = args.get("pin_memory") or False
 
         self.transforms = None

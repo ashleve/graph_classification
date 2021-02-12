@@ -25,7 +25,7 @@ model:
     lr: 0.001
     weight_decay: 0.0
     node_emb_size: 100
-    edge_emb_size: 100
+#    edge_emb_size: 100
     node_features: ${model.node_emb_size}
     conv1_size: 256
     conv2_size: 256
@@ -35,15 +35,15 @@ model:
 #    dropout1: 0.1
 #    dropout2: 0.1
     lin2_size: 32
-    output_size: 1
+    output_size: ${datamodule.classes}
 
 datamodule:
-    _target_: src.datamodules.ogbg_molpcba.OGBGPpa
+    _target_: src.datamodules.ogbg_ppa.OGBGPpa
     data_dir: ${data_dir}
     batch_size: 32
-    node_features: 9
-    edge_features: 3
-    classes: 2
+    node_features: "?"
+    edge_features: 7
+    classes: 37
 
 logger:
     wandb:
