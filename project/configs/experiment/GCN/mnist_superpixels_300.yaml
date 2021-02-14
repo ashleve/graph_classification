@@ -10,8 +10,7 @@ defaults:
     - override /callbacks: default_callbacks.yaml
     - override /logger: csv_logger.yaml
 
-seeds:
-    pytorch_seed: 12345
+seed: 1234
 
 trainer:
     min_epochs: 10
@@ -26,10 +25,13 @@ model:
     weight_decay: 0.0
     architecture: GCN
     node_features: ${datamodule.node_features}
+    activation: "prelu"
     conv1_size: 64
     conv2_size: 128
     conv3_size: 512
+    conv4_size: null
     pool_method: add
+    use_batch_norm_after_pooling: False
     lin1_size: 128
     lin2_size: 64
     output_size: ${datamodule.classes}
@@ -39,12 +41,20 @@ datamodule:
     data_dir: ${data_dir}
     num_nodes: "300"
     batch_size: 32
-    train_val_test_split_ratio: [0.85, 0.10, 0.05]
+    train_val_test_split: [55_000, 5_000, 10_000]
     node_features: 3
     classes: 10
 
 logger:
     wandb:
-        tags: ["mnist_superpixels_300"]
+        tags: ["mnist_sp_300"]
         notes: ""
         group: ""
+
+callbacks:
+    model_checkpoint:
+        monitor: "val_acc"
+        mode: "max"
+    early_stopping:
+        monitor: "val_loss"
+        mode: "min"

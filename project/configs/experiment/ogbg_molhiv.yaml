@@ -20,17 +20,20 @@ trainer:
 
 model:
     _target_: src.models.ogbg_molhiv_classifier.OGBGMolhivClassifier
-    architecture: GCN
     optimizer: adam
     lr: 0.001
     weight_decay: 0.0
+    architecture: GCN
     node_emb_size: 300
 #    edge_emb_size: 100
     node_features: ${model.node_emb_size}
+    activation: "prelu"
     conv1_size: 512
-    conv2_size: 512
-    conv3_size: 512
+    conv2_size: 256
+    conv3_size: 256
+    conv4_size: null
     pool_method: add
+    use_batch_norm_after_pooling: False
     lin1_size: 128
     lin2_size: 64
     output_size: 1

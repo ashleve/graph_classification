@@ -3,6 +3,7 @@ optimizer: adam
 lr: 0.001
 weight_decay: 0.0
 architecture: GCN
+activation: "relu"
 node_features: ${datamodule.node_features}
 conv1_size: 64
 conv2_size: 128

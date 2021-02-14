@@ -3,6 +3,8 @@
 # example hyperparameter optimization of some experiment with optuna:
 # python train.py +experiment=ogbg_molhiv trainer.gpus=1 logger=wandb --config-name config_optuna.yaml --multirun
 
+# try defaults: -config.yaml
+
 # specify here default training configuration
 defaults:
     - trainer: default_trainer.yaml
@@ -11,7 +13,7 @@ defaults:
     - callbacks: default_callbacks.yaml  # set this to null if you don't want to use callbacks
     - logger: csv_logger.yaml  # set logger here or use command line (e.g. `python train.py logger=wandb`)
 
-    # we add this just to enable color logging
+    # add this to enable color logging
     # - hydra/hydra_logging: colorlog
     # - hydra/job_logging: colorlog
 
@@ -28,6 +30,12 @@ original_work_dir: ${hydra:runtime.cwd}
 
 # path to folder with data
 data_dir: ${original_work_dir}/data/
+
+
+# metric optimized by optuna
+optimized_metric: "val_acc_best"
+#optimized_metric: "val_ap_best"
+#optimized_metric: "val_rocauc_best"
 
 
 # output paths for hydra logs
@@ -53,9 +61,10 @@ hydra:
             direction: maximize
 
             # number of experiments that will be executed
-            n_trials: 20
+#            n_trials: 20
+            n_trials: 1
 
-            # choose optuna hyperparameter sampler ('tpe', 'random' or 'cmaes'),
+            # choose optuna hyperparameter sampler ('tpe', 'random', 'cmaes' or 'nsgaii', 'motpes')
             # learn more here: https://optuna.readthedocs.io/en/stable/reference/samplers.html
             sampler: tpe
 
@@ -63,7 +72,10 @@ hydra:
         search_space:
             datamodule.batch_size:
                 type: categorical
-                choices: [64, 32]
+                choices: [128, 64, 32]
+            model.activation:
+                type: categorical
+                choices: ["relu", "prelu"]
             model.conv1_size:
                 type: categorical
                 choices: [128, 256, 512]
@@ -72,10 +84,16 @@ hydra:
                 choices: [128, 256, 512]
             model.conv3_size:
                 type: categorical
-                choices: [128, 256, 512]
+                choices: [null, 128, 256, 512]
+            model.conv4_size:
+                type: categorical
+                choices: [null, 256, 512]
             model.lin1_size:
                 type: categorical
-                choices: [128, 64, 32]
+                choices: [128, 64]
             model.lin2_size:
                 type: categorical
                 choices: [64, 32]
+            model.use_batch_norm_after_pooling:
+                type: categorical
+                choices: [False, True]

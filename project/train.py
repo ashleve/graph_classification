@@ -2,7 +2,6 @@
 from pytorch_lightning.loggers import LightningLoggerBase
 from pytorch_lightning import LightningModule, LightningDataModule, Callback, Trainer
 import pytorch_lightning as pl
-import torch
 
 # hydra imports
 from omegaconf import DictConfig
@@ -28,58 +27,18 @@ def train(config):
     datamodule.prepare_data()
     datamodule.setup()
 
-    # dt = datamodule.train_dataloader()
-    # dv = datamodule.val_dataloader()
-    # dtest = datamodule.test_dataloader()
-    #
-    # total_sum = 0
-    # total_sum2 = 0
-    # for batch in dt:
-    #     x, y = batch.x, batch.y
-    #     total_sum += torch.sum(y == 1)
-    #     total_sum2 += torch.sum(y == 0)
-    #
-    # print()
-    # print(total_sum, total_sum2, len(datamodule.data_train))
-    # print(total_sum / len(datamodule.data_train))
-    # print()
-    #
-    # total_sum = 0
-    # total_sum2 = 0
-    # for batch in dv:
-    #     x, y = batch.x, batch.y
-    #     total_sum += torch.sum(y == 1)
-    #     total_sum2 += torch.sum(y == 0)
-    #
-    # print()
-    # print(total_sum, total_sum2, len(datamodule.data_val))
-    # print(total_sum / len(datamodule.data_val))
-    # print()
-    #
-    # total_sum = 0
-    # total_sum2 = 0
-    # for batch in dtest:
-    #     x, y = batch.x, batch.y
-    #     total_sum += torch.sum(y == 1)
-    #     total_sum2 += torch.sum(y == 0)
-    #
-    # print()
-    # print(total_sum, total_sum2, len(datamodule.data_test))
-    # print(total_sum / len(datamodule.data_test))
-    # print()
-
     # Init PyTorch Lightning callbacks ⚡
     callbacks: List[Callback] = [
         hydra.utils.instantiate(callback_conf)
         for callback_name, callback_conf in config["callbacks"].items()
-        if "_target_" in callback_conf  # ignore callback conf if there's no target
+        if "_target_" in callback_conf  # ignore callback config if it doesn't have '_target_'
     ] if "callbacks" in config else []
 
     # Init PyTorch Lightning loggers ⚡
     loggers: List[LightningLoggerBase] = [
         hydra.utils.instantiate(logger_conf)
         for logger_name, logger_conf in config["logger"].items()
-        if "_target_" in logger_conf   # ignore logger conf if there's no target
+        if "_target_" in logger_conf  # ignore loger config if it doesn't have '_target_'
     ] if "logger" in config else []
 
     # Init PyTorch Lightning trainer ⚡
@@ -89,6 +48,9 @@ def train(config):
     utils.extras(config, model, datamodule, callbacks, loggers, trainer)
 
     trainer.test(model=model, datamodule=datamodule)
+    # trainer.logger.log_hyperparams()
+    # print(trainer.logger)
+    # print(trainer.logger_connector)
 
     # Train the model
     trainer.fit(model=model, datamodule=datamodule)
@@ -100,7 +62,7 @@ def train(config):
     utils.finish()
 
     # Return best metric score for optuna
-    return trainer.callback_metrics["val_rocauc_best"]
+    return trainer.callback_metrics[config.get("optimized_metric", None)]
 
 
 @hydra.main(config_path="configs/", config_name="config.yaml")
@@ -108,6 +70,8 @@ def main(config: DictConfig):
     utils.print_config(config["model"])
     utils.print_config(config["datamodule"])
     utils.print_config(config["trainer"])
+    if config["model"]["conv3_size"] == "None":
+        config["model"]["conv4_size"] = "None"
     metric = train(config)
     return metric
 

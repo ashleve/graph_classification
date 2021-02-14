@@ -4,8 +4,8 @@ import torch.nn.functional as F
 import torch
 
 # import custom architectures
-from src.architectures.gcn import GCN
-from src.architectures.gat import GAT
+from src.architectures.gcn_flexible import GCN
+from src.architectures.gat_flexible import GAT
 
 
 class GraphClassifier(pl.LightningModule):
@@ -47,10 +47,10 @@ class GraphClassifier(pl.LightningModule):
         self.log('train_loss', loss, on_step=False, on_epoch=True, prog_bar=False)
 
         # log number of NaNs
-        # y_pred_nans = torch.sum(logits != logits)
-        # y_true_nans = torch.sum(batch.y != batch.y)
-        # self.log("y_pred_NaNs", y_pred_nans, reduce_fx=torch.sum, on_step=False, on_epoch=True, prog_bar=False)
-        # self.log("y_true_NaNs", y_true_nans, reduce_fx=torch.sum, on_step=False, on_epoch=True, prog_bar=False)
+        y_pred_nans = torch.sum(logits != logits)
+        y_true_nans = torch.sum(batch.y != batch.y)
+        self.log("y_pred_NaNs", y_pred_nans, reduce_fx=torch.sum, on_step=False, on_epoch=True, prog_bar=False)
+        self.log("y_true_NaNs", y_true_nans, reduce_fx=torch.sum, on_step=False, on_epoch=True, prog_bar=False)
 
         return {"loss": loss, "y_pred": y_pred, "y_true": y_true}
 
