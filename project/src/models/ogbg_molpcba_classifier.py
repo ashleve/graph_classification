@@ -2,11 +2,11 @@ from ogb.graphproppred import Evaluator
 import pytorch_lightning as pl
 import torch
 from ogb.graphproppred.mol_encoder import AtomEncoder, BondEncoder
-from torch.nn import functional as F
 
 # import custom architectures
-from src.architectures.gcn import GCN
-from src.architectures.gat import GAT
+from src.architectures.gcn_flexible import GCN
+from src.architectures.gat_flexible import GAT
+from src.architectures.graph_sage_flexible import GraphSAGE
 
 
 class OGBGMolpcbaClassifier(pl.LightningModule):
@@ -22,7 +22,7 @@ class OGBGMolpcbaClassifier(pl.LightningModule):
         elif self.hparams.architecture == "GAT":
             self.architecture = GAT(hparams=self.hparams)
         elif self.hparams.architecture == "GraphSAGE":
-            self.architecture = None
+            self.architecture = GraphSAGE(hparams=self.hparams)
         else:
             raise Exception("Invalid architecture name")
 
@@ -51,10 +51,10 @@ class OGBGMolpcbaClassifier(pl.LightningModule):
         self.log('train_loss', loss, on_step=False, on_epoch=True, prog_bar=False)
 
         # log number of NaNs
-        # y_pred_nans = torch.sum(logits != logits)
-        # y_true_nans = torch.sum(batch.y != batch.y)
-        # self.log("y_pred_NaNs", y_pred_nans, reduce_fx=torch.sum, on_step=False, on_epoch=True, prog_bar=False)
-        # self.log("y_true_NaNs", y_true_nans, reduce_fx=torch.sum, on_step=False, on_epoch=True, prog_bar=False)
+        y_pred_nans = torch.sum(logits != logits)
+        y_true_nans = torch.sum(batch.y != batch.y)
+        self.log("y_pred_NaNs", y_pred_nans, reduce_fx=torch.sum, on_step=False, on_epoch=True, prog_bar=False)
+        self.log("y_true_NaNs", y_true_nans, reduce_fx=torch.sum, on_step=False, on_epoch=True, prog_bar=False)
 
         return {"loss": loss, "y_pred": y_pred, "y_true": y_true}
 

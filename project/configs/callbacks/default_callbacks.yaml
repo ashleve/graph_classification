@@ -13,3 +13,8 @@ early_stopping:
     patience: 5             # how many epochs of not improving until training stops
     mode: "min"             # can be "max" or "min"
     min_delta: 0.0          # minimum change in the monitored metric needed to qualify as an improvement
+
+
+upload_code_to_wandb_as_artifact:
+    _target_: src.callbacks.wandb_callbacks.SaveCodeToWandb
+    code_dir: ${original_work_dir}/

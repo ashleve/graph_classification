@@ -1,0 +1,60 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py logger=wandb +experiment/
+
+defaults:
+    - override /trainer: default_trainer.yaml
+    - override /model: null
+    - override /datamodule: null
+    - override /callbacks: default_callbacks.yaml
+    - override /logger: csv_logger.yaml
+
+seed: 1234
+
+trainer:
+    min_epochs: 10
+    max_epochs: 100
+    accumulate_grad_batches: 1
+    gradient_clip_val: 0.5
+
+model:
+    _target_: src.models.ogbg_molpcba_classifier.OGBGMolpcbaClassifier
+    optimizer: adam
+    lr: 0.001
+    weight_decay: 0.0
+    architecture: GAT
+    node_emb_size: 300
+    node_features: ${model.node_emb_size}
+    activation: "prelu"
+    conv1_size: 512
+    conv2_size: 256
+    conv3_size: 512
+    conv4_size: null
+    pool_method: add
+    use_batch_norm_after_pooling: False
+    lin1_size: 128
+    lin2_size: 64
+    output_size: ${datamodule.classes}
+
+datamodule:
+    _target_: src.datamodules.ogbg_molpcba.OGBGMolpcba
+    data_dir: ${data_dir}
+    batch_size: 32
+    node_features: 9
+    edge_features: 3
+    classes: 128
+
+logger:
+    wandb:
+        tags: ["ogbg-molpcba"]
+        notes: ""
+        group: ""
+
+callbacks:
+    model_checkpoint:
+        monitor: "val_ap"
+        mode: "max"
+    early_stopping:
+        monitor: "val_loss"
+        mode: "min"

@@ -2,6 +2,8 @@
 import wandb
 from pytorch_lightning.loggers.wandb import WandbLogger
 import pytorch_lightning as pl
+from pytorch_lightning.loggers.neptune import NeptuneLogger
+from pytorch_lightning.callbacks.model_checkpoint import ModelCheckpoint
 
 # hydra imports
 from omegaconf import DictConfig, OmegaConf
@@ -42,9 +44,9 @@ def make_wandb_watch_model(loggers: List[pl.loggers.LightningLoggerBase], model:
     for logger in loggers:
         if isinstance(logger, WandbLogger):
             if hasattr(model, 'architecture'):
-                logger.watch(model.architecture, log='gradients')
+                logger.watch(model.architecture, log=None)
             else:
-                logger.watch(model, log='gradients')
+                logger.watch(model, log=None)
 
 
 def send_hparams_to_loggers(loggers: List[pl.loggers.LightningLoggerBase], hparams: dict):

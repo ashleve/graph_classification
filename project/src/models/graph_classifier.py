@@ -6,6 +6,7 @@ import torch
 # import custom architectures
 from src.architectures.gcn_flexible import GCN
 from src.architectures.gat_flexible import GAT
+from src.architectures.graph_sage_flexible import GraphSAGE
 
 
 class GraphClassifier(pl.LightningModule):
@@ -27,7 +28,7 @@ class GraphClassifier(pl.LightningModule):
         elif self.hparams.architecture == "GAT":
             self.architecture = GAT(hparams=self.hparams)
         elif self.hparams.architecture == "GraphSAGE":
-            raise Exception("Invalid architecture name")
+            self.architecture = GraphSAGE(hparams=self.hparams)
         else:
             raise Exception("Invalid architecture name")
 
@@ -45,12 +46,6 @@ class GraphClassifier(pl.LightningModule):
         acc = self.accuracy(y_pred, y_true)
         self.log('train_acc', acc, on_step=False, on_epoch=True, prog_bar=True)
         self.log('train_loss', loss, on_step=False, on_epoch=True, prog_bar=False)
-
-        # log number of NaNs
-        y_pred_nans = torch.sum(logits != logits)
-        y_true_nans = torch.sum(batch.y != batch.y)
-        self.log("y_pred_NaNs", y_pred_nans, reduce_fx=torch.sum, on_step=False, on_epoch=True, prog_bar=False)
-        self.log("y_true_NaNs", y_true_nans, reduce_fx=torch.sum, on_step=False, on_epoch=True, prog_bar=False)
 
         return {"loss": loss, "y_pred": y_pred, "y_true": y_true}
 

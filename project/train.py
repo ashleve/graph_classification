@@ -62,7 +62,9 @@ def train(config):
     utils.finish()
 
     # Return best metric score for optuna
-    return trainer.callback_metrics[config.get("optimized_metric", None)]
+    optimized_metric = config.get("optimized_metric", None)
+    if optimized_metric:
+        return trainer.callback_metrics[optimized_metric]
 
 
 @hydra.main(config_path="configs/", config_name="config.yaml")

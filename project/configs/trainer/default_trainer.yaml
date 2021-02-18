@@ -4,7 +4,7 @@ min_epochs: 10
 max_epochs: 100
 gradient_clip_val: 0.5
 progress_bar_refresh_rate: 10
-weights_summary: null  # null in yaml represents python None value
+weights_summary: "full"
 default_root_dir: "lightning_logs/"
 num_sanity_val_steps: 0
 # benchmark: True

@@ -1,9 +1,9 @@
 from torch_geometric.nn import global_max_pool, global_mean_pool, global_add_pool
-from torch_geometric.nn import GCNConv
+from torch_geometric.nn import SAGEConv
 from torch import nn
 
 
-class GCN(nn.Module):
+class GraphSAGE(nn.Module):
     """Flexible GCN network for hyperparameter search."""
 
     def __init__(self, hparams):
@@ -22,24 +22,23 @@ class GCN(nn.Module):
             self.activation = nn.ReLU
         elif self.hparams['activation'] == "prelu":
             self.activation = nn.PReLU
-            # self.activation = nn.ReLU
         else:
             raise Exception("Invalid activation function name")
 
-        self.conv1 = GCNConv(hparams['node_features'], hparams['conv1_size'])
+        self.conv1 = SAGEConv(hparams['node_features'], hparams['conv1_size'])
         self.activ_conv1 = self.activation()
 
-        self.conv2 = GCNConv(hparams['conv1_size'], hparams['conv2_size'])
+        self.conv2 = SAGEConv(hparams['conv1_size'], hparams['conv2_size'])
         self.activ_conv2 = self.activation()
 
         self.conv3 = None
         if type(hparams.get('conv3_size')) is int:
-            self.conv3 = GCNConv(hparams['conv2_size'], hparams['conv3_size'])
+            self.conv3 = SAGEConv(hparams['conv2_size'], hparams['conv3_size'])
             self.activ_conv3 = self.activation()
 
         self.conv4 = None
         if type(hparams.get('conv3_size')) is int and type(hparams.get('conv4_size')) is int:
-            self.conv4 = GCNConv(hparams['conv3_size'], hparams['conv4_size'])
+            self.conv4 = SAGEConv(hparams['conv3_size'], hparams['conv4_size'])
             self.activ_conv4 = self.activation()
 
         if self.hparams['pool_method'] == 'add':
@@ -61,8 +60,8 @@ class GCN(nn.Module):
             raise Exception("wtf")
 
         self.batch_norm = None
-        # if self.hparams.get("use_batch_norm_after_pooling"):
-        #     self.batch_norm = nn.BatchNorm1d(lin1_input_size)
+        if self.hparams.get("use_batch_norm_after_pooling"):
+            self.batch_norm = nn.BatchNorm1d(lin1_input_size)
 
         self.linear1 = nn.Linear(lin1_input_size, hparams['lin1_size'])
         self.activ_lin1 = self.activation()

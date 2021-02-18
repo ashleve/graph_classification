@@ -5,8 +5,9 @@ from ogb.graphproppred.mol_encoder import AtomEncoder, BondEncoder
 from torch.nn import functional as F
 
 # import custom architectures
-from src.architectures.gcn import GCN
-from src.architectures.gat import GAT
+from src.architectures.gcn_flexible import GCN
+from src.architectures.gat_flexible import GAT
+from src.architectures.graph_sage_flexible import GraphSAGE
 
 
 class OGBGMolhivClassifier(pl.LightningModule):
@@ -22,7 +23,7 @@ class OGBGMolhivClassifier(pl.LightningModule):
         elif self.hparams.architecture == "GAT":
             self.architecture = GAT(hparams=self.hparams)
         elif self.hparams.architecture == "GraphSAGE":
-            self.architecture = None
+            self.architecture = GraphSAGE(hparams=self.hparams)
         else:
             raise Exception("Invalid architecture name")
 
