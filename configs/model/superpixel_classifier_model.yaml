@@ -1,0 +1,14 @@
+_target_: src.pl_models.superpixel_classifier_model.SuperpixelClassifierModel
+
+lr: 0.001
+weight_decay: 0
+architecture: GCN
+activation: prelu
+node_features: 3
+conv1_size: 64
+conv2_size: 128
+conv3_size: 512
+pool_method: add
+lin1_size: 128
+lin2_size: 64
+output_size: 10
