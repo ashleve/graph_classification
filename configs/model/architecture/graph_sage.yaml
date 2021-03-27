@@ -1,0 +1,11 @@
+_target_: src.architectures.graph_sage.GraphSAGE
+
+activation: prelu
+num_node_features: 3
+num_conv_layers: 3
+conv_size: 256
+normalize: False
+pool_method: add
+lin1_size: 128
+lin2_size: 64
+output_size: 10

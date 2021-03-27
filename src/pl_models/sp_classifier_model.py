@@ -1,34 +1,24 @@
-from typing import Any, Dict, List, Sequence, Tuple, Union
+from typing import Any, Dict, List, Tuple
 
 import hydra
-import pytorch_lightning as pl
 import torch
+from omegaconf import DictConfig
+from pytorch_lightning import LightningModule
 from pytorch_lightning.metrics.classification import Accuracy
-from torch.optim import Optimizer
-
-from src.architectures.gat_flexible import GAT
-from src.architectures.gcn_flexible import GCN
-from src.architectures.graph_sage_flexible import GraphSAGE
 
 
-class SuperpixelClassifierModel(pl.LightningModule):
+class SuperpixelClassifierModel(LightningModule):
     """LightningModule for image classification from superpixels."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, architecture: DictConfig, optimizer: DictConfig):
         super().__init__()
 
         # this line ensures params passed to LightningModule will be saved to ckpt
         # it also allows to access params with 'self.hparams' attribute
         self.save_hyperparameters()
 
-        if self.hparams.architecture == "GCN":
-            self.architecture = GCN(hparams=self.hparams)
-        elif self.hparams.architecture == "GAT":
-            self.architecture = GAT(hparams=self.hparams)
-        elif self.hparams.architecture == "GraphSAGE":
-            self.architecture = GraphSAGE(hparams=self.hparams)
-        else:
-            raise Exception("Invalid architecture name")
+        # initialize network architecture (e.g. GCN)
+        self.architecture = hydra.utils.instantiate(self.hparams.architecture)
 
         # loss function
         self.criterion = torch.nn.CrossEntropyLoss()
@@ -46,10 +36,10 @@ class SuperpixelClassifierModel(pl.LightningModule):
             "val/loss": [],
         }
 
-    def forward(self, x) -> torch.Tensor:
-        return self.architecture(x)
+    def forward(self, batch) -> torch.Tensor:
+        return self.architecture(batch)
 
-    def step(self, batch) -> Dict[str, torch.Tensor]:
+    def step(self, batch) -> Tuple[torch.Tensor]:
         logits = self.forward(batch)
         loss = self.criterion(logits, batch.y)
         preds = torch.argmax(logits, dim=1)
@@ -86,9 +76,8 @@ class SuperpixelClassifierModel(pl.LightningModule):
         self.log("test/loss", loss, on_step=False, on_epoch=True)
         self.log("test/acc", acc, on_step=False, on_epoch=True)
 
-        return loss
+        return {"loss": loss, "preds": preds, "targets": targets}
 
-    # [OPTIONAL METHOD]
     def training_epoch_end(self, outputs: List[Any]) -> None:
         # log best so far train acc and train loss
         self.metric_hist["train/acc"].append(self.trainer.callback_metrics["train/acc"])
@@ -98,7 +87,6 @@ class SuperpixelClassifierModel(pl.LightningModule):
         self.log("train/acc_best", max(self.metric_hist["train/acc"]), prog_bar=False)
         self.log("train/loss_best", min(self.metric_hist["train/loss"]), prog_bar=False)
 
-    # [OPTIONAL METHOD]
     def validation_epoch_end(self, outputs: List[Any]) -> None:
         # log best so far val acc and val loss
         self.metric_hist["val/acc"].append(self.trainer.callback_metrics["val/acc"])
@@ -109,16 +97,7 @@ class SuperpixelClassifierModel(pl.LightningModule):
     def test_epoch_end(self, outputs: List[Any]) -> None:
         pass
 
-    def configure_optimizers(
-        self,
-    ) -> Union[Optimizer, Tuple[Sequence[Optimizer], Sequence[Any]]]:
-        """Choose what optimizers and learning-rate schedulers to use in your optimization.
-        Normally you'd need one. But in the case of GANs or similar you might have multiple.
-
-        See examples here:
-            https://pytorch-lightning.readthedocs.io/en/latest/common/lightning_module.html#configure-optimizers
-
-        """
+    def configure_optimizers(self):
         optim = hydra.utils.instantiate(
             self.hparams.optimizer, params=self.parameters()
         )

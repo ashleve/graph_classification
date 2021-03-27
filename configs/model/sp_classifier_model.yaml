@@ -1,0 +1,5 @@
+defaults:
+    - architecture: gcn
+    - optimizer: adam
+
+_target_: src.pl_models.sp_classifier_model.SuperpixelClassifierModel

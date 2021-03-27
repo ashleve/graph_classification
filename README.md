@@ -37,15 +37,14 @@ Train model with default configuration
 python run.py
 ```
 
-Train model with chosen experiment configuration
+Train model with chosen experiment configuration from [configs/experiment/](configs/experiment/)
 ```yaml
-# experiment configurations are placed in folder `configs/experiment/`
-python run.py +experiment=exp_names
+python run.py +experiment=GCN/ogbg_molhiv
 ```
 
 You can override any parameter from command line like this
 ```yaml
-python run.py trainer.max_epochs=20 optimizer.lr=0.0005
+python run.py trainer.max_epochs=20 datamodule.batch_size=0.0005
 ```
 
 Train on GPU

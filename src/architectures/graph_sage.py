@@ -1,14 +1,14 @@
 from torch import nn
 from torch_geometric.nn import (
-    GCNConv,
+    SAGEConv,
     global_add_pool,
     global_max_pool,
     global_mean_pool,
 )
 
 
-class GCN(nn.Module):
-    """Flexible GCN network."""
+class GraphSAGE(nn.Module):
+    """Flexible GraphSAGE network."""
 
     def __init__(self, **hparams):
         super().__init__()
@@ -47,14 +47,20 @@ class GCN(nn.Module):
         self.conv_modules = nn.ModuleList()
         self.activ_modules = nn.ModuleList()
 
+        normalize = hparams.get("normalize", False)
+
         self.conv_modules.append(
-            GCNConv(hparams["num_node_features"], hparams["conv_size"])
+            SAGEConv(
+                hparams["num_node_features"], hparams["conv_size"], normalize=normalize
+            )
         )
         self.activ_modules.append(activation())
 
         for _ in range(hparams["num_conv_layers"] - 1):
             self.conv_modules.append(
-                GCNConv(hparams["conv_size"], hparams["conv_size"])
+                SAGEConv(
+                    hparams["conv_size"], hparams["conv_size"], normalize=normalize
+                )
             )
             self.activ_modules.append(activation())
 

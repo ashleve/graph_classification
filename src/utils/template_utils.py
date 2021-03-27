@@ -72,53 +72,28 @@ def print_config(
         "logger",
         "seed",
     ),
-    extra_depth_fields: Sequence[str] = (
-        "callbacks",
-        "logger",
-    ),
     resolve: bool = True,
 ) -> None:
     """Prints content of DictConfig using Rich library and its tree structure.
-
     Args:
         config (DictConfig): Config.
         fields (Sequence[str], optional): Determines which main fields from config will be printed
         and in what order.
-        extra_depth_fields (Sequence[str], optional): Fields which should be printed with extra tree depth.
         resolve (bool, optional): Whether to resolve reference fields of DictConfig.
     """
 
-    # TODO print main config path and experiment config path
-    # print(f"Main config path: [link file://{directory}]{directory}")
-
-    # TODO refactor the whole method
-
     style = "dim"
-
     tree = Tree(f":gear: CONFIG", style=style, guide_style=style)
 
     for field in fields:
         branch = tree.add(field, style=style, guide_style=style)
 
         config_section = config.get(field)
+        branch_content = str(config_section)
+        if isinstance(config_section, DictConfig):
+            branch_content = OmegaConf.to_yaml(config_section, resolve=resolve)
 
-        if not config_section:
-            # raise Exception(f"Field {field} not found in config!")
-            branch.add("None")
-            continue
-
-        if field in extra_depth_fields:
-            for nested_field in config_section:
-                nested_config_section = config_section[nested_field]
-                nested_branch = branch.add(nested_field, style=style, guide_style=style)
-                cfg_str = OmegaConf.to_yaml(nested_config_section, resolve=resolve)
-                nested_branch.add(Syntax(cfg_str, "yaml"))
-        else:
-            if isinstance(config_section, DictConfig):
-                cfg_str = OmegaConf.to_yaml(config_section, resolve=resolve)
-            else:
-                cfg_str = str(config_section)
-            branch.add(Syntax(cfg_str, "yaml"))
+        branch.add(Syntax(branch_content, "yaml"))
 
     print(tree)
 
@@ -150,11 +125,16 @@ def log_hyperparameters(
 
     # choose which parts of hydra config will be saved to loggers
     hparams["trainer"] = config["trainer"]
-    hparams["model"] = config["model"]
-    hparams["optimizer"] = config["optimizer"]
     hparams["datamodule"] = config["datamodule"]
+    hparams["optim"] = config["model"]["optimizer"]
+    hparams["arch"] = config["model"]["architecture"]
+    # hparams["cb"] = config["callbacks"]
+
     if "callbacks" in config:
-        hparams["callbacks"] = config["callbacks"]
+        if "model_checkpoint" in config["callbacks"]:
+            hparams["model_ckpt"] = config["callbacks"]["model_checkpoint"]
+        if "early_stopping" in config["callbacks"]:
+            hparams["early_stop"] = config["callbacks"]["early_stopping"]
 
     # save sizes of each dataset
     # (requires calling `datamodule.setup()` first to initialize datasets)
