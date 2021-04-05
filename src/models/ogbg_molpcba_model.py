@@ -43,9 +43,7 @@ class OGBGMolpcbaModel(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         logits = self.forward(batch)
         is_labeled_idx = batch.y == batch.y
-        loss = self.criterion(
-            logits[is_labeled_idx], batch.y.to(torch.float32)[is_labeled_idx]
-        )
+        loss = self.criterion(logits[is_labeled_idx], batch.y.to(torch.float32)[is_labeled_idx])
 
         # training metrics
         y_pred = logits
@@ -78,9 +76,7 @@ class OGBGMolpcbaModel(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         logits = self.forward(batch)
         is_labeled_idx = batch.y == batch.y
-        loss = self.criterion(
-            logits[is_labeled_idx], batch.y.to(torch.float32)[is_labeled_idx]
-        )
+        loss = self.criterion(logits[is_labeled_idx], batch.y.to(torch.float32)[is_labeled_idx])
 
         # training metrics
         y_pred = logits
@@ -93,9 +89,7 @@ class OGBGMolpcbaModel(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         logits = self.forward(batch)
         is_labeled_idx = batch.y == batch.y
-        loss = self.criterion(
-            logits[is_labeled_idx], batch.y.to(torch.float32)[is_labeled_idx]
-        )
+        loss = self.criterion(logits[is_labeled_idx], batch.y.to(torch.float32)[is_labeled_idx])
 
         # training metrics
         y_pred = logits

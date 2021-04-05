@@ -1,4 +1,4 @@
-_target_: src.pl_datamodules.mnist_sp.MnistSuperpixelsCustom
+_target_: src.datamodules.mnist_sp.MnistSuperpixelsCustom
 
 data_dir: ${data_dir}
 batch_size: 64

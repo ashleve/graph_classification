@@ -1,4 +1,4 @@
-_target_: src.architectures.gcn.GCN
+_target_: src.models.modules.gcn.GCN
 
 activation: prelu
 num_node_features: 3

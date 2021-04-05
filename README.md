@@ -34,21 +34,23 @@ pip install -r requirements.txt
 
 Train model with default configuration
 ```yaml
+# default
 python run.py
+
+# train on CPU
+python run.py trainer.gpus=0
+
+# train on GPU
+python run.py trainer.gpus=1
 ```
 
 Train model with chosen experiment configuration from [configs/experiment/](configs/experiment/)
 ```yaml
-python run.py +experiment=GCN/ogbg_molhiv
+python run.py +experiment=experiment_name
 ```
 
 You can override any parameter from command line like this
 ```yaml
-python run.py trainer.max_epochs=20 datamodule.batch_size=0.0005
-```
-
-Train on GPU
-```yaml
-python run.py trainer.gpus=1
+python run.py trainer.max_epochs=20 datamodule.batch_size=64
 ```
 <br>

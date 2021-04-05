@@ -1,4 +1,4 @@
-_target_: src.architectures.graph_sage.GraphSAGE
+_target_: src.models.modules.graph_sage.GraphSAGE
 
 activation: prelu
 num_node_features: 3

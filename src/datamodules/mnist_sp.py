@@ -4,7 +4,7 @@ from pytorch_lightning import LightningDataModule
 from torch.utils.data import random_split
 from torch_geometric.data import DataLoader, Dataset
 
-from src.datasets.mnist_sp_dataset import MNISTSuperpixelsCustomDataset
+from src.datamodules.datasets.mnist_sp_dataset import MNISTSuperpixelsCustomDataset
 
 
 class MnistSuperpixelsCustom(LightningDataModule):
