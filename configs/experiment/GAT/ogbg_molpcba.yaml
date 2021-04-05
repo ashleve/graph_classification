@@ -26,7 +26,7 @@ model:
     pool_method: add
     lin1_size: 128
     lin2_size: 64
-    output_size: 1
+    output_size: 128
   optimizer:
     lr: 0.001
     weight_decay: 0
