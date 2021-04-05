@@ -1,18 +1,17 @@
 # from ogb.graphproppred import Evaluator
-# import pytorch_lightning as pl
 # import torch
 # from ogb.graphproppred.mol_encoder import AtomEncoder, BondEncoder
-# from torch.nn import functional as F
 #
-# # import custom architectures
-# from src.architectures.gcn import GCN
-# from src.architectures.gat import GAT
+# import hydra
+# import torch
+# from omegaconf import DictConfig
+# from pytorch_lightning import LightningModule
+# from pytorch_lightning.metrics.classification import Accuracy
 #
 #
-# class OGBGPpaModel(pl.LightningModule):
-#
-#     def __init__(self, *args, **kwargs):
-#         super().__init__()
+# class OGBGPpaModel(LightningModule):
+# def __init__(self, architecture: DictConfig, optimizer: DictConfig):
+#     super().__init__()
 #         self.save_hyperparameters()
 #         self.atom_encoder = AtomEncoder(emb_dim=self.hparams.node_emb_size)
 #         # self.bond_encoder = BondEncoder(emb_dim=self.hparams.edge_emb_size)

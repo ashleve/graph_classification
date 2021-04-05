@@ -2,7 +2,7 @@ import torch
 from torch_geometric.data import InMemoryDataset
 
 
-class MNISTSuperpixelsCustomDataset(InMemoryDataset):
+class SuperpixelsCustomDataset(InMemoryDataset):
     """https://pytorch-geometric.readthedocs.io/en/latest/notes/create_dataset.html"""
 
     def __init__(self, root):

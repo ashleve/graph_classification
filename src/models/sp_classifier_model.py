@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Tuple
+from typing import Any, List
 
 import hydra
 import torch
@@ -18,7 +18,7 @@ class SuperpixelClassifierModel(LightningModule):
         self.save_hyperparameters()
 
         # initialize network architecture (e.g. GCN)
-        self.architecture = hydra.utils.instantiate(self.hparams.architecture)
+        self.model = hydra.utils.instantiate(self.hparams.architecture)
 
         # loss function
         self.criterion = torch.nn.CrossEntropyLoss()
@@ -36,16 +36,16 @@ class SuperpixelClassifierModel(LightningModule):
             "val/loss": [],
         }
 
-    def forward(self, batch) -> torch.Tensor:
-        return self.architecture(batch)
+    def forward(self, batch: Any):
+        return self.model(batch)
 
-    def step(self, batch) -> Tuple[torch.Tensor]:
+    def step(self, batch: Any):
         logits = self.forward(batch)
         loss = self.criterion(logits, batch.y)
         preds = torch.argmax(logits, dim=1)
         return loss, preds, batch.y
 
-    def training_step(self, batch: Any, batch_idx: int) -> Dict[str, torch.Tensor]:
+    def training_step(self, batch: Any, batch_idx: int):
         loss, preds, targets = self.step(batch)
 
         # log train metrics to loggers
@@ -58,7 +58,7 @@ class SuperpixelClassifierModel(LightningModule):
         # remember to always return loss from training_step, or else backpropagation will fail!
         return {"loss": loss, "preds": preds, "targets": targets}
 
-    def validation_step(self, batch: Any, batch_idx: int) -> Dict[str, torch.Tensor]:
+    def validation_step(self, batch: Any, batch_idx: int):
         loss, preds, targets = self.step(batch)
 
         # log val metrics to loggers
@@ -68,7 +68,7 @@ class SuperpixelClassifierModel(LightningModule):
 
         return {"loss": loss, "preds": preds, "targets": targets}
 
-    def test_step(self, batch: Any, batch_idx: int) -> Dict[str, torch.Tensor]:
+    def test_step(self, batch: Any, batch_idx: int):
         loss, preds, targets = self.step(batch)
 
         # log test metrics to loggers
@@ -78,21 +78,21 @@ class SuperpixelClassifierModel(LightningModule):
 
         return {"loss": loss, "preds": preds, "targets": targets}
 
-    def training_epoch_end(self, outputs: List[Any]) -> None:
+    def training_epoch_end(self, outputs: List[Any]):
         # log best so far train acc and train loss
         self.metric_hist["train/acc"].append(self.trainer.callback_metrics["train/acc"])
         self.metric_hist["train/loss"].append(self.trainer.callback_metrics["train/loss"])
         self.log("train/acc_best", max(self.metric_hist["train/acc"]), prog_bar=False)
         self.log("train/loss_best", min(self.metric_hist["train/loss"]), prog_bar=False)
 
-    def validation_epoch_end(self, outputs: List[Any]) -> None:
+    def validation_epoch_end(self, outputs: List[Any]):
         # log best so far val acc and val loss
         self.metric_hist["val/acc"].append(self.trainer.callback_metrics["val/acc"])
         self.metric_hist["val/loss"].append(self.trainer.callback_metrics["val/loss"])
         self.log("val/acc_best", max(self.metric_hist["val/acc"]), prog_bar=False)
         self.log("val/loss_best", min(self.metric_hist["val/loss"]), prog_bar=False)
 
-    def test_epoch_end(self, outputs: List[Any]) -> None:
+    def test_epoch_end(self, outputs: List[Any]):
         pass
 
     def configure_optimizers(self):

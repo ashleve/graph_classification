@@ -17,6 +17,7 @@ wandb>=0.10.20
 # mlflow
 
 # --------- others --------- #
+ogb
 rich
 python-dotenv
 pre-commit

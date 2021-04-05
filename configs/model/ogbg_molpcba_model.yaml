@@ -1,0 +1,5 @@
+defaults:
+    - architecture: gcn
+    - optimizer: adam
+
+_target_: src.models.ogbg_molpcba_model.OGBGMolpcbaModel

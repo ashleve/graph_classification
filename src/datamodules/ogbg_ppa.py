@@ -1,34 +1,34 @@
-import pytorch_lightning as pl
-import torch
+from typing import Optional
+
 from ogb.graphproppred import PygGraphPropPredDataset
-from torch_geometric.data import DataLoader
+from pytorch_lightning import LightningDataModule
+from torch_geometric.data import DataLoader, Dataset
 
 
-class OGBGPpa(pl.LightningDataModule):
-    def __init__(self, *args, **kwargs):
+class OGBGPpa(LightningDataModule):
+    def __init__(
+        self,
+        data_dir: str = "data/",
+        batch_size: int = 64,
+        num_workers: int = 0,
+        pin_memory: bool = False,
+    ):
         super().__init__()
 
-        self.data_dir = kwargs.get("data_dir")
+        self.data_dir = data_dir
 
-        self.batch_size = kwargs.get("batch_size") or 32
-        self.num_workers = kwargs.get("num_workers") or 0
-        self.pin_memory = kwargs.get("pin_memory") or False
+        self.batch_size = batch_size
+        self.num_workers = num_workers
+        self.pin_memory = pin_memory
 
         self.transform = None
         self.pre_transform = None
 
-        self.data_train = None
-        self.data_val = None
-        self.data_test = None
+        self.data_train: Optional[Dataset] = None
+        self.data_val: Optional[Dataset] = None
+        self.data_test: Optional[Dataset] = None
 
-    def prepare_data(self):
-        """Download data if needed. This method is called only from a single GPU.
-        Do not use it to assign state (self.x = y). Pretransform is applied before saving dataset on disk."""
-        PygGraphPropPredDataset(
-            name="ogbg-ppa", root=self.data_dir, pre_transform=self.pre_transform
-        )
-
-    def setup(self, stage=None):
+    def setup(self, stage: Optional[str] = None):
         """Load data. Set variables: self.data_train, self.data_val, self.data_test."""
         dataset = PygGraphPropPredDataset(
             name="ogbg-ppa", root=self.data_dir, transform=self.transform
