@@ -9,7 +9,7 @@
 
 
 # activate conda environment
-conda activate myenv
+conda activate gnn
 
 # initialize hydra tab completion for bash
 eval "$(python run.py -sc install=bash)"

@@ -25,8 +25,8 @@ git clone https://github.com/hobogalaxy/graph_classification
 cd graph_classification
 
 # [OPTIONAL] create conda environment
-conda env create -f conda_env_gpu.yaml -n gnn_env
-conda activate gnn_env
+conda env create -f conda_env_gpu.yaml -n gnn
+conda activate gnn
 
 # install requirements
 pip install -r requirements.txt
