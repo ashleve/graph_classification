@@ -9,7 +9,7 @@ from pytorch_lightning import LightningModule
 
 
 class OGBGMolpcbaModel(LightningModule):
-    def __init__(self, architecture: DictConfig, optimizer: DictConfig):
+    def __init__(self, architecture: DictConfig, optimizer: DictConfig, node_emb_size: int = 300):
         super().__init__()
 
         # this line ensures params passed to LightningModule will be saved to ckpt

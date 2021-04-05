@@ -1,0 +1,41 @@
+# @package _global_
+
+defaults:
+    - override /trainer: default_trainer.yaml
+    - override /model: ogbg_molpcba_model.yaml
+    - override /datamodule: ogbg_molpcba.yaml
+    - override /callbacks: default_callbacks.yaml
+    - override /logger: null
+
+
+seed: 12345
+
+trainer:
+    min_epochs: 10
+    max_epochs: 100
+    gradient_clip_val: 0.5
+
+model:
+  node_emb_size: 300
+  architecture:
+    _target_: src.models.modules.gat.GAT
+    activation: prelu
+    num_node_features: ${..node_emb_size}
+    num_conv_layers: 3
+    conv_size: 256
+    pool_method: add
+    lin1_size: 128
+    lin2_size: 64
+    output_size: 1
+  optimizer:
+    lr: 0.001
+    weight_decay: 0
+
+datamodule:
+  batch_size: 64
+
+callbacks:
+  model_checkpoint:
+    monitor: "val/ap"
+  early_stopping:
+    monitor: "val/ap"

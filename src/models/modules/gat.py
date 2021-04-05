@@ -50,13 +50,13 @@ class GAT(nn.Module):
         heads = hparams.get("heads", 1)
 
         self.conv_modules.append(
-            GATConv(hparams["num_node_features"], hparams["conv_size"]), heads=heads
+            GATConv(hparams["num_node_features"], hparams["conv_size"], heads=heads)
         )
         self.activ_modules.append(activation())
 
         for _ in range(hparams["num_conv_layers"] - 1):
             self.conv_modules.append(
-                GATConv(hparams["conv_size"], hparams["conv_size"]), heads=heads
+                GATConv(hparams["conv_size"], hparams["conv_size"], heads=heads)
             )
             self.activ_modules.append(activation())
 

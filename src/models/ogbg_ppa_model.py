@@ -10,7 +10,7 @@
 #
 #
 # class OGBGPpaModel(LightningModule):
-# def __init__(self, architecture: DictConfig, optimizer: DictConfig):
+# def __init__(self, architecture: DictConfig, optimizer: DictConfig, node_emb_size: int = 300):
 #     super().__init__()
 #         self.save_hyperparameters()
 #         self.atom_encoder = AtomEncoder(emb_dim=self.hparams.node_emb_size)
