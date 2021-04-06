@@ -16,23 +16,21 @@ trainer:
     gradient_clip_val: 0.5
 
 model:
-  architecture:
-    _target_: src.models.modules.gat.GAT
-    activation: prelu
-    num_node_features: 3
-    num_conv_layers: 3
-    conv_size: 256
-    pool_method: add
-    lin1_size: 128
-    lin2_size: 64
-    output_size: 10
-  optimizer:
-    lr: 0.001
-    weight_decay: 0
+  architecture: GAT
+  heads: 1
+  num_node_features: 3
+  activation: prelu
+  num_conv_layers: 3
+  conv_size: 256
+  pool_method: add
+  lin1_size: 128
+  lin2_size: 64
+  output_size: 10
+  lr: 0.001
+  weight_decay: 0
 
 datamodule:
   batch_size: 64
-
 
 callbacks:
   model_checkpoint:

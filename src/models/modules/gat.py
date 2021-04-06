@@ -10,7 +10,7 @@ from torch_geometric.nn import (
 class GAT(nn.Module):
     """Flexible GAT network."""
 
-    def __init__(self, **hparams):
+    def __init__(self, hparams: dict):
         super().__init__()
         self.hparams = hparams
 

@@ -10,7 +10,7 @@ from torch_geometric.nn import (
 class GraphSAGE(nn.Module):
     """Flexible GraphSAGE network."""
 
-    def __init__(self, **hparams):
+    def __init__(self, hparams: dict):
         super().__init__()
         self.hparams = hparams
 
