@@ -1,81 +1,57 @@
-<div align="center">    
- 
-# Graph Classification Experiments 
-Using PyTorch Lightning + Hydra to benchmark graph neural networks on graph classification datasets.<br>
-Built with [lightning-hydra-template](https://github.com/hobogalaxy/lightning-hydra-template).
+<div align="center">
+
+# Graph Classification Benchmarks
+
+<a href="https://pytorch.org/get-started/locally/"><img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-ee4c2c?logo=pytorch&logoColor=white"></a>
+<a href="https://pytorchlightning.ai/"><img alt="Lightning" src="https://img.shields.io/badge/-Lightning-792ee5"></a>
+<a href="https://hydra.cc/"><img alt="Config: Hydra" src="https://img.shields.io/badge/Config-Hydra-89b8cd"></a>
+<a href="https://github.com/hobogalaxy/lightning-hydra-template"><img alt="Template" src="https://img.shields.io/badge/-Lightning--Hydra--Template-017F2F?style=flat&logo=github&labelColor=gray"></a>
+
 </div>
-<br>
 
 ## Description
-The following datasets have implemented [datamodules](project/src/datamodules) and [lightning models](project/src/models):
-- Image classification from graphs of superpixels (MNIST, FashionMNIST, CIFAR10)
-- [Open Graph Benchmarks](https://ogb.stanford.edu/docs/graphprop/): graph property prediction (ogbg-molhiv, ogbg-molpcba, ogbg-ppa)
+Benchmarking graph neural networks on graph classification datasets, using PyTorch Lightning and Hydra.<br>
+Built with [lightning-hydra-template](https://github.com/ashleve/lightning-hydra-template).
+
+### Datasets
+- [Open Graph Benchmarks](https://ogb.stanford.edu/docs/graphprop/) (graph property prediction)
+- Image classification from superpixels (MNIST, FashionMNIST, CIFAR10)
+
 
 ## How to run
-First, install dependencies
-```bash
+Install dependencies
+```yaml
 # clone project
 git clone https://github.com/hobogalaxy/graph_classification
 cd graph_classification
 
-# optionally create conda environment
-conda update conda
-conda env create -f conda_env.yaml -n your_env_name
-conda activate your_env_name
+# [OPTIONAL] create conda environment
+conda env create -f conda_env_gpu.yaml -n gnn
+conda activate gnn
 
 # install requirements
 pip install -r requirements.txt
 ```
-Next, install pytorch geometric:<br>
-https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html
-<br>
-<br>
 
-
-Now you can train model with default configuration without logging:
-```bash
-cd project
-python train.py
-```
-
-Or you can train model with chosen logger like Weights&Biases:
+Train model with default configuration
 ```yaml
-# set project name and entity name in graph_classification/configs/logger/wandb.yaml
-wandb:
-    args:
-        project: "your_project_name"
-        entity: "your_wandb_team_name"
-```
-```bash
-# train model with Weights&Biases
-python train.py logger=wandb
+# default
+python run.py
+
+# train on CPU
+python run.py trainer.gpus=0
+
+# train on GPU
+python run.py trainer.gpus=1
 ```
 
-Or you can train model with chosen experiment config:<br>
-<b>(Other superpixel experiments require to firstly generate dataset with 
-[superpixels_dataset_generation.ipynb](project/notebooks/superpixels_dataset_generation.ipynb))</b>
-```bash
-python train.py +experiment/GCN=mnist_superpixels
-```
-<br>
-
-To execute all experiments from folder `graph_classification/configs/experiment/GCN/` run:
-```bash
-python train.py --multirun '+experiment/GCN=glob(*)'
+Train model with chosen experiment configuration from [configs/experiment/](configs/experiment/)
+```yaml
+python run.py +experiment=GAT/gat_ogbg_molpcba
 ```
 
-You can override any parameter from command line like this:
-```
-python train.py trainer.max_epochs=20 optimizer.lr=0.0005
-```
-
-Combaining it all:
-```
-python train.py --multirun '+experiment/GCN=glob(*)' trainer.max_epochs=10 logger=wandb
-```
-
-Optionally you can install project as a package with [setup.py](setup.py):
-```bash
-pip install -e .
+You can override any parameter from command line like this
+```yaml
+python run.py trainer.max_epochs=20 datamodule.batch_size=64
 ```
 <br>

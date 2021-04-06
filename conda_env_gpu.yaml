@@ -1,0 +1,22 @@
+name: gnn
+
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.8
+  - pip
+  - notebook
+  - ipython
+  - cudatoolkit=11.1
+  - pytorch=1.8.1
+  - torchvision=0.9.1
+  - pip:
+      - -r requirements.txt
+      - torch-scatter -f https://pytorch-geometric.com/whl/torch-1.8.0+cu111.html
+      - torch-sparse -f https://pytorch-geometric.com/whl/torch-1.8.0+cu111.html
+      - torch-cluster -f https://pytorch-geometric.com/whl/torch-1.8.0+cu111.html
+      - torch-spline-conv -f https://pytorch-geometric.com/whl/torch-1.8.0+cu111.html
+      - torch-geometric
