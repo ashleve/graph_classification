@@ -10,12 +10,13 @@
 </div>
 
 ## Description
-Using PyTorch Lightning + Hydra to benchmark graph neural networks on graph classification datasets.<br>
-Built with [lightning-hydra-template](https://github.com/hobogalaxy/lightning-hydra-template).
-<!--
-The following datasets have implemented [datamodules](src/pl_datamodules) and [lightning models](src/pl_models):
-- Image classification from graphs of superpixels (MNIST, FashionMNIST, CIFAR10)
-- [Open Graph Benchmarks](https://ogb.stanford.edu/docs/graphprop/): graph property prediction (ogbg-molhiv, ogbg-molpcba, ogbg-ppa) -->
+Benchmarking graph neural networks on graph classification datasets, using PyTorch Lightning and Hydra.<br>
+Built with [lightning-hydra-template](https://github.com/ashleve/lightning-hydra-template).
+
+### Datasets
+- [Open Graph Benchmarks](https://ogb.stanford.edu/docs/graphprop/) (graph property prediction)
+- Image classification from superpixels (MNIST, FashionMNIST, CIFAR10)
+
 
 ## How to run
 Install dependencies
@@ -46,7 +47,7 @@ python run.py trainer.gpus=1
 
 Train model with chosen experiment configuration from [configs/experiment/](configs/experiment/)
 ```yaml
-python run.py +experiment=experiment_name
+python run.py +experiment=GAT/gat_ogbg_molpcba
 ```
 
 You can override any parameter from command line like this
