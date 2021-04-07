@@ -30,7 +30,7 @@ hydra:
             direction: maximize
 
             # number of experiments that will be executed
-            n_trials: 20
+            n_trials: 25
 
             # choose optuna hyperparameter sampler ('tpe', 'random', 'cmaes' or 'nsgaii', 'motpe')
             # learn more here: https://optuna.readthedocs.io/en/stable/reference/samplers.html
@@ -40,17 +40,16 @@ hydra:
         search_space:
             datamodule.batch_size:
                 type: categorical
-                choices: [32, 64, 128]
-            model.lr:
-                type: float
-                low: 0.0001
-                high: 0.2
-            model.lin1_size:
+                choices: [64, 128, 256]
+            model.activation:
                 type: categorical
-                choices: [32, 64, 128, 256, 512]
-            model.lin2_size:
+                choices: ["relu", "prelu"]
+            model.num_conv_layers:
                 type: categorical
-                choices: [32, 64, 128, 256, 512]
-            model.lin3_size:
+                choices: [2, 3, 4]
+            model.conv_size:
                 type: categorical
-                choices: [32, 64, 128, 256, 512]
+                choices: [64, 128, 256, 512]
+            model.heads:
+                type: categorical
+                choices: [1, 2, 3]

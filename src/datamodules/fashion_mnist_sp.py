@@ -11,7 +11,7 @@ class FashionMNISTSuperpixelsCustom(LightningDataModule):
     def __init__(
         self,
         data_dir: str = "data/",
-        num_nodes: Union[int, str] = 75,
+        num_nodes: Union[int, str] = 100,
         batch_size: int = 32,
         train_val_test_split: Sequence[int] = (55_000, 5_000, 10_000),
         num_workers: int = 0,

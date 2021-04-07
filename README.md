@@ -1,7 +1,6 @@
 <div align="center">
 
 # Graph Classification Benchmarks
-
 <a href="https://pytorch.org/get-started/locally/"><img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-ee4c2c?logo=pytorch&logoColor=white"></a>
 <a href="https://pytorchlightning.ai/"><img alt="Lightning" src="https://img.shields.io/badge/-Lightning-792ee5"></a>
 <a href="https://hydra.cc/"><img alt="Config: Hydra" src="https://img.shields.io/badge/Config-Hydra-89b8cd"></a>
@@ -9,9 +8,11 @@
 
 </div>
 
+
 ## Description
 Benchmarking graph neural networks on graph classification datasets, using PyTorch Lightning and Hydra.<br>
 Built with [lightning-hydra-template](https://github.com/ashleve/lightning-hydra-template).
+
 
 ### Datasets
 - [Open Graph Benchmarks](https://ogb.stanford.edu/docs/graphprop/) (graph property prediction)
@@ -22,7 +23,7 @@ Built with [lightning-hydra-template](https://github.com/ashleve/lightning-hydra
 Install dependencies
 ```yaml
 # clone project
-git clone https://github.com/hobogalaxy/graph_classification
+git clone https://github.com/ashleve/graph_classification
 cd graph_classification
 
 # [OPTIONAL] create conda environment
@@ -54,4 +55,7 @@ You can override any parameter from command line like this
 ```yaml
 python run.py trainer.max_epochs=20 datamodule.batch_size=64
 ```
-<br>
+
+
+## Results
+Coming soon...
