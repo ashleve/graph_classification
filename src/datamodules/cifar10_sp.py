@@ -7,11 +7,11 @@ from torch_geometric.data import DataLoader, Dataset
 from src.datamodules.datasets.sp_dataset import SuperpixelsCustomDataset
 
 
-class CIFAR10MNISTSuperpixelsCustom(LightningDataModule):
+class CIFAR10SuperpixelsCustom(LightningDataModule):
     def __init__(
         self,
         data_dir: str = "data/",
-        num_nodes: Union[int, str] = 75,
+        num_nodes: Union[int, str] = 100,
         batch_size: int = 32,
         train_val_test_split: Sequence[int] = (55_000, 5_000, 10_000),
         num_workers: int = 0,

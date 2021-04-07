@@ -30,7 +30,9 @@ model:
   weight_decay: 0
 
 datamodule:
+  num_nodes: 100
   batch_size: 64
+  train_val_test_split: [55_000, 5_000, 10_000]
 
 callbacks:
   model_checkpoint:
