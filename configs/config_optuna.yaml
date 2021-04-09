@@ -49,7 +49,7 @@ hydra:
                 choices: [2, 3, 4]
             model.conv_size:
                 type: categorical
-                choices: [64, 128, 256, 512]
+                choices: [128, 256, 512]
             model.heads:
                 type: categorical
                 choices: [1, 2, 3]

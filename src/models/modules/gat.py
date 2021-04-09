@@ -56,11 +56,11 @@ class GAT(nn.Module):
 
         for _ in range(hparams["num_conv_layers"] - 1):
             self.conv_modules.append(
-                GATConv(hparams["conv_size"], hparams["conv_size"], heads=heads)
+                GATConv(heads * hparams["conv_size"], hparams["conv_size"], heads=heads)
             )
             self.activ_modules.append(activation())
 
-        self.lin1 = nn.Linear(hparams["conv_size"], hparams["lin1_size"])
+        self.lin1 = nn.Linear(heads * hparams["conv_size"], hparams["lin1_size"])
         self.activ_lin1 = activation()
 
         self.lin2 = nn.Linear(hparams["lin1_size"], hparams["lin2_size"])
