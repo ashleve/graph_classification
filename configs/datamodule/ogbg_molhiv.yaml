@@ -3,4 +3,4 @@ _target_: src.datamodules.ogbg_molhiv.OGBGMolhiv
 data_dir: ${data_dir}
 batch_size: 64
 pin_memory: True
-num_workers: 12
+num_workers: 10

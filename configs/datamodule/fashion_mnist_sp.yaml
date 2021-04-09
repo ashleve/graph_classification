@@ -4,4 +4,4 @@ data_dir: ${data_dir}
 batch_size: 64
 train_val_test_split: [55_000, 5_000, 10_000]
 pin_memory: True
-num_workers: 12
+num_workers: 10
