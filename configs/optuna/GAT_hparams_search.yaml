@@ -1,18 +1,11 @@
 # @package _global_
 
-# example hyperparameter optimization of some experiment with optuna:
-# python run.py -m --config-name config_optuna.yaml +experiment=exp_example_simple logger=wandb
-
 defaults:
-    # load everything from main config file
-    - config.yaml
-
-    # override sweeper to Optuna!
-    - override hydra/sweeper: optuna
+    - override /hydra/sweeper: optuna
 
 
 # choose metric which will be optimized by optuna
-optimized_metric: "val/acc_best"
+optimized_metric: ???
 
 
 hydra:
@@ -20,21 +13,24 @@ hydra:
     # it optimizes for value returned from function with @hydra.main decorator
     # learn more here: https://hydra.cc/docs/next/plugins/optuna_sweeper
     sweeper:
-        optuna_config:
-            study_name: null
-            storage: null
-            n_jobs: 1
+        _target_: hydra_plugins.hydra_optuna_sweeper.optuna_sweeper.OptunaSweeper
+        direction: maximize
+        storage: null
+        study_name: null
+        n_trials: 20
+        n_jobs: 1
+
+        sampler:
+            _target_: optuna.samplers.TPESampler
             seed: 12345
-
-            # 'minimize' or 'maximize' the objective
-            direction: maximize
-
-            # number of experiments that will be executed
-            n_trials: 25
-
-            # choose optuna hyperparameter sampler ('tpe', 'random', 'cmaes' or 'nsgaii', 'motpe')
-            # learn more here: https://optuna.readthedocs.io/en/stable/reference/samplers.html
-            sampler: tpe
+            consider_prior: true
+            prior_weight: 1.0
+            consider_magic_clip: true
+            consider_endpoints: false
+            n_startup_trials: 10
+            n_ei_candidates: 24
+            multivariate: false
+            warn_independent_sampling: true
 
         # define range of hyperparameters
         search_space:
@@ -52,4 +48,4 @@ hydra:
                 choices: [128, 256, 512]
             model.heads:
                 type: categorical
-                choices: [1, 2, 3]
+                choices: [1, 2]

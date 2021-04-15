@@ -18,6 +18,7 @@ trainer:
 model:
   architecture: GAT
   heads: 1
+  # num_node_features: 13
   num_node_features: 3
   activation: prelu
   num_conv_layers: 3

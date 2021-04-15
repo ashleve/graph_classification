@@ -55,9 +55,12 @@ class GAT(nn.Module):
         self.activ_modules.append(activation())
 
         for _ in range(hparams["num_conv_layers"] - 1):
-            self.conv_modules.append(
-                GATConv(heads * hparams["conv_size"], hparams["conv_size"], heads=heads)
-            )
+            conv = GATConv(heads * hparams["conv_size"], hparams["conv_size"], heads=heads)
+            # nn.init.xavier_uniform_(conv.lin_l.weight)
+            # nn.init.xavier_uniform_(conv.lin_r.weight)
+            # nn.init.xavier_uniform_(conv.att_l)
+            # nn.init.xavier_uniform_(conv.att_r)
+            self.conv_modules.append(conv)
             self.activ_modules.append(activation())
 
         self.lin1 = nn.Linear(heads * hparams["conv_size"], hparams["lin1_size"])
