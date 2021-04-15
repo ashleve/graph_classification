@@ -7,6 +7,6 @@ min_epochs: 10
 max_epochs: 100
 
 weights_summary: top
-progress_bar_refresh_rate: 10
+progress_bar_refresh_rate: 5
 
 terminate_on_nan: True

@@ -145,3 +145,4 @@ logs/
 wandb/
 .env
 .autoenv
+tmp.py

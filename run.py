@@ -14,6 +14,9 @@ def main(config: DictConfig):
     # Read more here: https://github.com/facebookresearch/hydra/issues/934
     from src.train import train
     from src.utils import template_utils
+    import traceback
+    import time
+    import wandb
 
     # A couple of optional utilities:
     # - disabling python warnings
@@ -28,7 +31,18 @@ def main(config: DictConfig):
         template_utils.print_config(config, resolve=True)
 
     # Train model
-    return train(config)
+    try:
+        return train(config)
+    except Exception:
+        traceback.print_exc()
+        wandb.finish()
+        time.sleep(180)
+        try:
+            return train(config)
+        except Exception:
+            wandb.finish()
+            time.sleep(120)
+            return 0
 
 
 if __name__ == "__main__":

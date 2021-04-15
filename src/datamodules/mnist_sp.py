@@ -1,5 +1,6 @@
 from typing import Optional, Sequence, Union
 
+import torch_geometric.transforms as T
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import random_split
 from torch_geometric.data import DataLoader, Dataset
@@ -35,7 +36,12 @@ class MNISTSuperpixelsCustom(LightningDataModule):
         else:
             raise Exception("Invalid number of nodes.")
 
-        self.transforms = None
+        self.transform = None
+        self.pre_transform = None
+
+        # self.pre_transform = T.Compose([
+        #     T.OneHotDegree(max_degree=9),
+        # ])
 
         self.data_train: Optional[Dataset] = None
         self.data_val: Optional[Dataset] = None
@@ -48,10 +54,14 @@ class MNISTSuperpixelsCustom(LightningDataModule):
 
     def setup(self, stage: Optional[str] = None):
         """Load data. Set variables: self.data_train, self.data_val, self.data_test."""
-        dataset_full = SuperpixelsCustomDataset(self.data_dir)
+        dataset_full = SuperpixelsCustomDataset(
+            self.data_dir, pre_transform=self.pre_transform, transform=self.pre_transform
+        )
         self.data_train, self.data_val, self.data_test = random_split(
             dataset_full, self.train_val_test_split
         )
+        # print(self.data_train[0])
+        # print(self.data_train[0].x > 1)
 
     def train_dataloader(self):
         return DataLoader(

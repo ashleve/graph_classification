@@ -7,6 +7,8 @@ from skimage.segmentation import slic
 
 
 def convert_img_to_superpixels_graph(image, desired_nodes=75, add_position_to_features=True):
+    image = image / 255
+
     height = image.shape[0]
     width = image.shape[1]
     num_of_features = image.shape[2] + 2 if add_position_to_features else image.shape[2]
