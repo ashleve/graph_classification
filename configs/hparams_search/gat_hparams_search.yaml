@@ -17,7 +17,7 @@ hydra:
         direction: maximize
         storage: null
         study_name: null
-        n_trials: 20
+        n_trials: 15
         n_jobs: 1
 
         sampler:

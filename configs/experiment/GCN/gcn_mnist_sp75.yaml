@@ -16,8 +16,7 @@ trainer:
     gradient_clip_val: 0.5
 
 model:
-  architecture: GAT
-  heads: 1
+  architecture: GCN
   num_node_features: 3
   activation: prelu
   num_conv_layers: 3

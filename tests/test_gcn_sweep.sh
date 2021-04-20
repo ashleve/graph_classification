@@ -17,8 +17,8 @@ export PYTHONWARNINGS="ignore"
 
 echo "TEST 1"
 python run.py --multirun \
-experiment=GAT/gat_mnist_sp75 \
-hparams_search=gat_hparams_search optimized_metric="val/acc_best" \
+experiment=GCN/gcn_mnist_sp75 \
+hparams_search=gcn_hparams_search optimized_metric="val/acc_best" \
 hydra.sweeper.n_trials=1 \
 trainer.gpus=1 trainer.max_epochs=1 \
 datamodule.num_workers=10 datamodule.pin_memory=True \
@@ -26,8 +26,8 @@ print_config=false
 
 echo "TEST 2"
 python run.py --multirun \
-experiment=GAT/gat_fashion_mnist_sp100 \
-hparams_search=gat_hparams_search \
+experiment=GCN/gcn_fashion_mnist_sp100 \
+hparams_search=gcn_hparams_search \
 optimized_metric="val/acc_best" \
 hydra.sweeper.n_trials=1 \
 trainer.gpus=1 trainer.max_epochs=1 \
@@ -36,8 +36,8 @@ print_config=false
 
 echo "TEST 3"
 python run.py --multirun \
-experiment=GAT/gat_cifar10_sp100 \
-hparams_search=gat_hparams_search \
+experiment=GCN/gcn_cifar10_sp100 \
+hparams_search=gcn_hparams_search \
 optimized_metric="val/acc_best" \
 hydra.sweeper.n_trials=1 \
 trainer.gpus=1 trainer.max_epochs=1 \
@@ -46,8 +46,8 @@ print_config=false
 
 echo "TEST 4"
 python run.py --multirun \
-experiment=GAT/gat_ogbg_molhiv \
-hparams_search=gat_hparams_search \
+experiment=GCN/gcn_ogbg_molhiv \
+hparams_search=gcn_hparams_search \
 optimized_metric="val/rocauc_best" \
 hydra.sweeper.n_trials=1 \
 trainer.gpus=1 trainer.max_epochs=1 \
@@ -56,8 +56,8 @@ print_config=false
 
 echo "TEST 5"
 python run.py --multirun \
-experiment=GAT/gat_ogbg_molpcba \
-hparams_search=gat_hparams_search \
+experiment=GCN/gcn_ogbg_molpcba \
+hparams_search=gcn_hparams_search \
 optimized_metric="val/ap_best" \
 hydra.sweeper.n_trials=1 \
 trainer.gpus=1 trainer.max_epochs=1 \

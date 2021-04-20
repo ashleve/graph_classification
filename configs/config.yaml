@@ -9,7 +9,7 @@ defaults:
     - logger: null  # set logger here or use command line (e.g. `python run.py logger=wandb`)
 
     - experiment: null
-    - optuna: null
+    - hparams_search: null
 
     # enable color logging
     - override hydra/hydra_logging: colorlog
@@ -50,11 +50,11 @@ hydra:
         dir: logs/multiruns/${now:%Y-%m-%d_%H-%M-%S}
         subdir: ${hydra.job.num}
 
-    job:
-        # you can set here environment variables that are universal for all users
-        # for system specific variables (like data paths) it's better to use .env file!
-        env_set:
-            # currently there are some issues with running sweeps alongside wandb
-            # https://github.com/wandb/client/issues/1314
-            # this env var fixes that
-            WANDB_START_METHOD: thread
+    # job:
+    #     # you can set here environment variables that are universal for all users
+    #     # for system specific variables (like data paths) it's better to use .env file!
+    #     env_set:
+    #         # currently there are some issues with running sweeps alongside wandb
+    #         # https://github.com/wandb/client/issues/1314
+    #         # this env var fixes that
+    #         WANDB_START_METHOD: thread

@@ -1,0 +1,51 @@
+# @package _global_
+
+defaults:
+    - override /hydra/sweeper: optuna
+
+
+# choose metric which will be optimized by optuna
+optimized_metric: ???
+
+
+hydra:
+    # here we define Optuna hyperparameter search
+    # it optimizes for value returned from function with @hydra.main decorator
+    # learn more here: https://hydra.cc/docs/next/plugins/optuna_sweeper
+    sweeper:
+        _target_: hydra_plugins.hydra_optuna_sweeper.optuna_sweeper.OptunaSweeper
+        direction: maximize
+        storage: null
+        study_name: null
+        n_trials: 15
+        n_jobs: 1
+
+        sampler:
+            _target_: optuna.samplers.TPESampler
+            seed: 12345
+            consider_prior: true
+            prior_weight: 1.0
+            consider_magic_clip: true
+            consider_endpoints: false
+            n_startup_trials: 10
+            n_ei_candidates: 24
+            multivariate: false
+            warn_independent_sampling: true
+
+        # define range of hyperparameters
+        search_space:
+            datamodule.batch_size:
+                type: categorical
+                choices: [64, 128, 256]
+            model.activation:
+                type: categorical
+                choices: ["relu", "prelu"]
+            model.num_conv_layers:
+                type: categorical
+                choices: [2, 3, 4]
+            model.conv_size:
+                type: categorical
+                choices: [128, 256, 512]
+            model.normalize:
+                type: categorical
+                choices: [True, False]
