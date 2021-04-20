@@ -2,8 +2,8 @@
 
 defaults:
     - override /trainer: default_trainer.yaml
-    - override /model: sp_classifier_model.yaml
-    - override /datamodule: mnist_sp.yaml
+    - override /model: ogbg_molpcba_model.yaml
+    - override /datamodule: ogbg_molpcba.yaml
     - override /callbacks: default_callbacks.yaml
     - override /logger: null
 
@@ -16,26 +16,24 @@ trainer:
     gradient_clip_val: 0.5
 
 model:
-  architecture: GAT
-  heads: 1
-  num_node_features: 3
+  architecture: GCN
+  num_node_features: 300
+  normalize: False
   activation: prelu
   num_conv_layers: 3
   conv_size: 256
   pool_method: add
   lin1_size: 128
   lin2_size: 64
-  output_size: 10
+  output_size: 128
   lr: 0.001
   weight_decay: 0
 
 datamodule:
-  num_nodes: 75
   batch_size: 64
-  train_val_test_split: [55_000, 5_000, 10_000]
 
 callbacks:
   model_checkpoint:
-    monitor: "val/acc"
+    monitor: "val/ap"
   early_stopping:
-    monitor: "val/acc"
+    monitor: "val/ap"

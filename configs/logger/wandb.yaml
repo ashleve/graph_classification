@@ -2,7 +2,8 @@
 
 wandb:
     _target_: pytorch_lightning.loggers.wandb.WandbLogger
-    project: "gnn-gradient-clipping-experiments"
+    project: "graph-classification-benchmarks"
+    # project: "tests"
     # entity: ""  # set to name of your wandb team or just remove it
     # offline: False  # set True to store all logs only locally
     job_type: "train"

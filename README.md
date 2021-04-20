@@ -10,7 +10,8 @@
 
 
 ## Description
-Benchmarking graph neural networks on graph classification datasets, using PyTorch Lightning and Hydra.<br>
+This repository is supposed to be a place for curated, high quality benchmarks of Graph Neural Networks, implemented with PyTorch Lightning and Hydra.<br>
+Only datasets big enough to provide good measures are taken into consideration.<br>
 Built with [lightning-hydra-template](https://github.com/ashleve/lightning-hydra-template).
 
 
@@ -45,7 +46,7 @@ python run.py trainer.gpus=1
 
 Train model with chosen experiment configuration from [configs/experiment/](configs/experiment/)
 ```yaml
-python run.py +experiment=GAT/gat_ogbg_molpcba
+python run.py experiment=GAT/gat_ogbg_molpcba
 ```
 
 You can override any parameter from command line like this
