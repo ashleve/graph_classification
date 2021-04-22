@@ -2,8 +2,8 @@
 
 defaults:
     - override /trainer: default_trainer.yaml
-    - override /model: sp_classifier_model.yaml
-    - override /datamodule: mnist_sp.yaml
+    - override /model: ogbg_molhiv_model.yaml
+    - override /datamodule: ogbg_molhiv.yaml
     - override /callbacks: default_callbacks.yaml
     - override /logger: null
 
@@ -16,26 +16,23 @@ trainer:
     gradient_clip_val: 0.5
 
 model:
-  architecture: GraphSAGE
-  num_node_features: 3
-  normalize: False
+  architecture: GIN
+  num_node_features: 300
   activation: prelu
   num_conv_layers: 3
   conv_size: 256
   pool_method: add
   lin1_size: 128
   lin2_size: 64
-  output_size: 10
+  output_size: 1
   lr: 0.001
   weight_decay: 0
 
 datamodule:
-  num_nodes: 75
   batch_size: 64
-  train_val_test_split: [55_000, 5_000, 10_000]
 
 callbacks:
   model_checkpoint:
-    monitor: "val/acc"
+    monitor: "val/rocauc"
   early_stopping:
-    monitor: "val/acc"
+    monitor: "val/rocauc"

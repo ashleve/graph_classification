@@ -16,7 +16,7 @@ trainer:
     gradient_clip_val: 0.5
 
 model:
-  architecture: GCN
+  architecture: GraphSAGE
   num_node_features: 5
   normalize: False
   activation: prelu

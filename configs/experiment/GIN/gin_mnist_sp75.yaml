@@ -16,9 +16,8 @@ trainer:
     gradient_clip_val: 0.5
 
 model:
-  architecture: GraphSAGE
+  architecture: GIN
   num_node_features: 3
-  normalize: False
   activation: prelu
   num_conv_layers: 3
   conv_size: 256
