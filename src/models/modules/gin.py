@@ -45,7 +45,6 @@ class GIN(nn.Module):
             raise Exception("Invalid pooling method name")
 
         self.conv_modules = nn.ModuleList()
-        self.batchnorm_modules = nn.ModuleList()
         self.activ_modules = nn.ModuleList()
 
         net = nn.Sequential(
@@ -54,7 +53,6 @@ class GIN(nn.Module):
             nn.Linear(hparams["conv_size"], hparams["conv_size"]),
         )
         self.conv_modules.append(GINConv(net))
-        self.batchnorm_modules.append(nn.BatchNorm1d(hparams["conv_size"]))
         self.activ_modules.append(activation())
 
         for _ in range(hparams["num_conv_layers"] - 1):
@@ -64,7 +62,6 @@ class GIN(nn.Module):
                 nn.Linear(hparams["conv_size"], hparams["conv_size"]),
             )
             self.conv_modules.append(GINConv(net))
-            self.batchnorm_modules.append(nn.BatchNorm1d(hparams["conv_size"]))
             self.activ_modules.append(activation())
 
         self.lin1 = nn.Linear(hparams["conv_size"], hparams["lin1_size"])
@@ -78,11 +75,8 @@ class GIN(nn.Module):
     def forward(self, data):
         x, edge_index, batch = data.x, data.edge_index, data.batch
 
-        for layer, batchnorm, activation in zip(
-            self.conv_modules, self.batchnorm_modules, self.activ_modules
-        ):
+        for layer, activation in zip(self.conv_modules, self.activ_modules):
             x = layer(x, edge_index)
-            x = batchnorm(x)
             x = activation(x)
 
         x = self.pooling_method(x, batch)
