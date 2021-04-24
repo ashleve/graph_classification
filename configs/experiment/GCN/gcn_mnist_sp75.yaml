@@ -30,7 +30,7 @@ model:
 
 datamodule:
   num_nodes: 75
-  batch_size: 64
+  batch_size: 128
   train_val_test_split: [55_000, 5_000, 10_000]
 
 callbacks:

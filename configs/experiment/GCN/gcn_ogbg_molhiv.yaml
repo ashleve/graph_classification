@@ -18,9 +18,9 @@ trainer:
 model:
   architecture: GCN
   num_node_features: 300
-  activation: prelu
+  activation: relu
   num_conv_layers: 3
-  conv_size: 256
+  conv_size: 512
   pool_method: add
   lin1_size: 128
   lin2_size: 64
@@ -29,7 +29,7 @@ model:
   weight_decay: 0
 
 datamodule:
-  batch_size: 64
+  batch_size: 128
 
 callbacks:
   model_checkpoint:

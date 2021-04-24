@@ -20,8 +20,8 @@ model:
   num_node_features: 3
   normalize: False
   activation: prelu
-  num_conv_layers: 3
-  conv_size: 256
+  num_conv_layers: 4
+  conv_size: 128
   pool_method: add
   lin1_size: 128
   lin2_size: 64
