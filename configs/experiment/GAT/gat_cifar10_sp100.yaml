@@ -17,11 +17,11 @@ trainer:
 
 model:
   architecture: GAT
-  heads: 1
+  heads: 2
   num_node_features: 5
   activation: prelu
   num_conv_layers: 3
-  conv_size: 256
+  conv_size: 512
   pool_method: add
   lin1_size: 128
   lin2_size: 64
@@ -31,7 +31,7 @@ model:
 
 datamodule:
   num_nodes: 100
-  batch_size: 64
+  batch_size: 128
   train_val_test_split: [45_000, 5_000, 10_000]
 
 callbacks:

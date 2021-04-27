@@ -16,11 +16,11 @@ trainer:
     gradient_clip_val: 0.5
 
 model:
-  architecture: GCN
+  architecture: GraphSAGE
   num_node_features: 5
   normalize: False
   activation: prelu
-  num_conv_layers: 3
+  num_conv_layers: 4
   conv_size: 256
   pool_method: add
   lin1_size: 128
@@ -31,7 +31,7 @@ model:
 
 datamodule:
   num_nodes: 100
-  batch_size: 64
+  batch_size: 128
   train_val_test_split: [45_000, 5_000, 10_000]
 
 callbacks:

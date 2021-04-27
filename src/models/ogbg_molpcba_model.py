@@ -5,7 +5,7 @@ from ogb.graphproppred import Evaluator
 from ogb.graphproppred.mol_encoder import AtomEncoder, BondEncoder
 from pytorch_lightning import LightningModule
 
-from src.models.modules import gat, gcn, graph_sage
+from src.models.modules import gat, gcn, gin, graph_sage
 
 
 class OGBGMolpcbaModel(LightningModule):
@@ -37,10 +37,14 @@ class OGBGMolpcbaModel(LightningModule):
         # init network architecture
         if self.hparams.architecture == "GCN":
             self.model = gcn.GCN(hparams=self.hparams)
-        if self.hparams.architecture == "GAT":
+        elif self.hparams.architecture == "GAT":
             self.model = gat.GAT(hparams=self.hparams)
-        if self.hparams.architecture == "GraphSAGE":
+        elif self.hparams.architecture == "GraphSAGE":
             self.model = graph_sage.GraphSAGE(hparams=self.hparams)
+        elif self.hparams.architecture == "GIN":
+            self.model = gin.GIN(hparams=self.hparams)
+        else:
+            raise Exception("Incorrect architecture name!")
 
         # loss function
         self.criterion = torch.nn.BCEWithLogitsLoss()

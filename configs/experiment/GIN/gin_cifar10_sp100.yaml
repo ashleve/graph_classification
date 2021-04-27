@@ -3,7 +3,7 @@
 defaults:
     - override /trainer: default_trainer.yaml
     - override /model: sp_classifier_model.yaml
-    - override /datamodule: mnist_sp.yaml
+    - override /datamodule: cifar10_sp.yaml
     - override /callbacks: default_callbacks.yaml
     - override /logger: null
 
@@ -16,9 +16,8 @@ trainer:
     gradient_clip_val: 0.5
 
 model:
-  architecture: GAT
-  heads: 2
-  num_node_features: 3
+  architecture: GIN
+  num_node_features: 5
   activation: prelu
   num_conv_layers: 4
   conv_size: 256
@@ -30,9 +29,9 @@ model:
   weight_decay: 0
 
 datamodule:
-  num_nodes: 75
-  batch_size: 64
-  train_val_test_split: [55_000, 5_000, 10_000]
+  num_nodes: 100
+  batch_size: 256
+  train_val_test_split: [45_000, 5_000, 10_000]
 
 callbacks:
   model_checkpoint:
