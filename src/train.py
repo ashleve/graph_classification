@@ -8,7 +8,7 @@ from pytorch_lightning import seed_everything
 import hydra
 from omegaconf import DictConfig
 
-from src.utils import template_utils
+from src.utils import utils
 
 log = logging.getLogger(__name__)
 
@@ -60,7 +60,7 @@ def train(config: DictConfig) -> Optional[float]:
 
     # Send some parameters from config to all lightning loggers
     log.info("Logging hyperparameters!")
-    template_utils.log_hyperparameters(
+    utils.log_hyperparameters(
         config=config,
         model=model,
         datamodule=datamodule,
@@ -80,7 +80,7 @@ def train(config: DictConfig) -> Optional[float]:
 
     # Make sure everything closed properly
     log.info("Finalizing!")
-    template_utils.finish(
+    utils.finish(
         config=config,
         model=model,
         datamodule=datamodule,

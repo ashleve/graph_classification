@@ -1,4 +1,4 @@
-_target_: src.datamodules.fashion_mnist_sp.FashionMNISTSuperpixelsCustom
+_target_: src.datamodules.sp_fashion_mnist_datamodule.FashionMNISTSuperpixelsDataModule
 
 data_dir: ${data_dir}
 batch_size: 64

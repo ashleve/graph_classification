@@ -3,14 +3,30 @@ import warnings
 from typing import List, Sequence
 
 import pytorch_lightning as pl
+import rich
 import wandb
 from omegaconf import DictConfig, OmegaConf
 from pytorch_lightning.loggers.wandb import WandbLogger
-from rich import print
+from pytorch_lightning.utilities import rank_zero_only
 from rich.syntax import Syntax
 from rich.tree import Tree
 
-log = logging.getLogger(__name__)
+
+def get_logger(name=__name__, level=logging.INFO):
+    """Initializes python logger."""
+
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+
+    # this ensures all logging levels get marked with the rank zero decorator
+    # otherwise logs would get multiplied for each GPU process in multi-GPU setup
+    for level in ("debug", "info", "warning", "error", "exception", "fatal", "critical"):
+        setattr(logger, level, rank_zero_only(getattr(logger, level)))
+
+    return logger
+
+
+log = get_logger()
 
 
 def extras(config: DictConfig) -> None:
@@ -26,9 +42,9 @@ def extras(config: DictConfig) -> None:
     # enable adding new keys to config
     OmegaConf.set_struct(config, False)
 
-    # disable python warnings if <config.disable_warnings=True>
-    if config.get("disable_warnings"):
-        log.info(f"Disabling python warnings! <config.disable_warnings=True>")
+    # disable python warnings if <config.ignore_warnings=True>
+    if config.get("ignore_warnings"):
+        log.info(f"Disabling python warnings! <config.ignore_warnings=True>")
         warnings.filterwarnings("ignore")
 
     # set <config.trainer.fast_dev_run=True> if <config.debug=True>
@@ -42,6 +58,8 @@ def extras(config: DictConfig) -> None:
         # Debuggers don't like GPUs or multiprocessing
         if config.trainer.get("gpus"):
             config.trainer.gpus = 0
+        if config.datamodule.get("pin_memory"):
+            config.datamodule.pin_memory = False
         if config.datamodule.get("num_workers"):
             config.datamodule.num_workers = 0
 
@@ -58,6 +76,7 @@ def extras(config: DictConfig) -> None:
     OmegaConf.set_struct(config, True)
 
 
+@rank_zero_only
 def print_config(
     config: DictConfig,
     fields: Sequence[str] = (
@@ -92,13 +111,14 @@ def print_config(
 
         branch.add(Syntax(branch_content, "yaml"))
 
-    print(tree)
+    rich.print(tree)
 
 
 def empty(*args, **kwargs):
     pass
 
 
+@rank_zero_only
 def log_hyperparameters(
     config: DictConfig,
     model: pl.LightningModule,
@@ -110,16 +130,7 @@ def log_hyperparameters(
     """This method controls which parameters from Hydra config are saved by Lightning loggers.
 
     Additionaly saves:
-        - sizes of train, val, test dataset
         - number of trainable model parameters
-
-    Args:
-        config (DictConfig): [description]
-        model (pl.LightningModule): [description]
-        datamodule (pl.LightningDataModule): [description]
-        trainer (pl.Trainer): [description]
-        callbacks (List[pl.Callback]): [description]
-        logger (List[pl.loggers.LightningLoggerBase]): [description]
     """
 
     hparams = {}
@@ -132,16 +143,6 @@ def log_hyperparameters(
         hparams["optimizer"] = config["optimizer"]
     if "callbacks" in config:
         hparams["callbacks"] = config["callbacks"]
-
-    # save sizes of each dataset
-    # (requires calling `datamodule.setup()` first to initialize datasets)
-    # datamodule.setup()
-    # if hasattr(datamodule, "data_train") and datamodule.data_train:
-    #     hparams["datamodule/train_size"] = len(datamodule.data_train)
-    # if hasattr(datamodule, "data_val") and datamodule.data_val:
-    #     hparams["datamodule/val_size"] = len(datamodule.data_val)
-    # if hasattr(datamodule, "data_test") and datamodule.data_test:
-    #     hparams["datamodule/test_size"] = len(datamodule.data_test)
 
     # save number of model parameters
     hparams["model/params_total"] = sum(p.numel() for p in model.parameters())
@@ -168,16 +169,7 @@ def finish(
     callbacks: List[pl.Callback],
     logger: List[pl.loggers.LightningLoggerBase],
 ) -> None:
-    """Makes sure everything closed properly.
-
-    Args:
-        config (DictConfig): [description]
-        model (pl.LightningModule): [description]
-        datamodule (pl.LightningDataModule): [description]
-        trainer (pl.Trainer): [description]
-        callbacks (List[pl.Callback]): [description]
-        logger (List[pl.loggers.LightningLoggerBase]): [description]
-    """
+    """Makes sure everything closed properly."""
 
     # without this sweeps with wandb logger might crash!
     for lg in logger:
