@@ -1,6 +1,7 @@
 import os
 
 import torch
+import tqdm
 from torch.utils.data import ConcatDataset
 from torch_geometric.data import InMemoryDataset
 from torch_geometric.transforms import NormalizeScale, RadiusGraph, ToSLIC
@@ -49,7 +50,7 @@ class FashionMNISTSuperpixelsDataset(InMemoryDataset):
         # convert to superpixels
         print("This may take a few minutes on first run...")
         data_list = []
-        for graph, label in dataset:
+        for graph, label in tqdm.tqdm(dataset, desc="Generating superpixels", colour="GREEN"):
             datapoint = graph
             datapoint.y = torch.tensor(label)
             data_list.append(datapoint)

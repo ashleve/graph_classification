@@ -2,7 +2,7 @@
 import multiprocessing.pool as mpp
 
 
-def better_istarmap(self, func, iterable, chunksize=1):
+def multiprocessing_istarmap(self, func, iterable, chunksize=1):
     """
     starmap-version of imap
     This is only for possibility of displaying progress bar in jupyter notebook during

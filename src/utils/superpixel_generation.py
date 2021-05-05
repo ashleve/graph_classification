@@ -15,8 +15,8 @@ from tqdm.auto import tqdm
 # apply patch to enable progress bar with multiprocessing,
 # requires python 3.8+
 # see https://stackoverflow.com/questions/57354700/starmap-combined-with-tqdm/57364423#57364423
-# from better_istarmap import better_istarmap
-from src.utils.better_istarmap import better_istarmap
+# from multiprocessing_istarmap import multiprocessing_istarmap
+from src.utils.multiprocessing_istarmap import multiprocessing_istarmap
 
 
 def save_torch_geometric_superpixel_dataset(data_dir, dataset_name: str, data: dict, slices: dict):
@@ -61,7 +61,7 @@ def convert_torchvision_dataset_to_superpixel_graphs(
     start_time = time.time()
 
     # apply better istarmap trick (enables progress bar when using multiprocessing)
-    multiprocessing.pool.Pool.istarmap = better_istarmap
+    multiprocessing.pool.Pool.istarmap = multiprocessing_istarmap
 
     with multiprocessing.Pool(num_workers) as pool:
         args = list(zip(images, repeat(desired_nodes)))
