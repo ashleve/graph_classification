@@ -6,8 +6,6 @@ from itertools import repeat
 import networkx as nx
 import numpy as np
 import torch
-
-# from better_istarmap import better_istarmap
 from skimage.segmentation import slic
 from torch_geometric.data import Data
 
@@ -17,17 +15,18 @@ from tqdm.auto import tqdm
 # apply patch to enable progress bar with multiprocessing,
 # requires python 3.8+
 # see https://stackoverflow.com/questions/57354700/starmap-combined-with-tqdm/57364423#57364423
+# from better_istarmap import better_istarmap
 from src.utils.better_istarmap import better_istarmap
 
 
 def save_torch_geometric_superpixel_dataset(data_dir, dataset_name: str, data: dict, slices: dict):
     dataset = Data(x=data["x"], edge_index=data["edge_index"], pos=data["pos"], y=data["y"])
 
-    path = os.path.join(data_dir, dataset_name, "processed", "data.pt")
-    if not os.path.exists(os.path.dirname(path)):
+    path = os.path.join(data_dir, dataset_name, "processed")
+    if not os.path.exists(path):
         os.makedirs(path)
 
-    torch.save((dataset, slices), path)
+    torch.save((dataset, slices), path + "/data.pt")
 
 
 def convert_torchvision_dataset_to_superpixel_graphs(
@@ -207,5 +206,9 @@ if __name__ == "__main__":
         dataset, desired_nodes=100, num_workers=10
     )
 
-    torch_dataset = Data(x=data["x"], edge_index=data["edge_index"], pos=data["pos"], y=data["y"])
-    print(torch_dataset)
+    # torch_dataset = Data(x=data["x"], edge_index=data["edge_index"], pos=data["pos"], y=data["y"])
+    # print(torch_dataset)
+
+    save_torch_geometric_superpixel_dataset(
+        data_dir="data/", dataset_name="fahion_mnist_sp100", data=data, slices=slices
+    )
