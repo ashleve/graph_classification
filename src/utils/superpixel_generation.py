@@ -6,7 +6,8 @@ from itertools import repeat
 import networkx as nx
 import numpy as np
 import torch
-from better_istarmap import better_istarmap
+
+# from better_istarmap import better_istarmap
 from skimage.segmentation import slic
 from torch_geometric.data import Data
 
@@ -16,7 +17,7 @@ from tqdm.auto import tqdm
 # apply patch to enable progress bar with multiprocessing,
 # requires python 3.8+
 # see https://stackoverflow.com/questions/57354700/starmap-combined-with-tqdm/57364423#57364423
-# from src.utils.better_istarmap import better_istarmap
+from src.utils.better_istarmap import better_istarmap
 
 
 def save_torch_geometric_superpixel_dataset(data_dir, dataset_name: str, data: dict, slices: dict):
