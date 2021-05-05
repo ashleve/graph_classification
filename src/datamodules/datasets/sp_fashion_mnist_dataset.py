@@ -1,26 +1,40 @@
 import os
+from typing import Callable, Optional
 
 import torch
 import tqdm
 from torch.utils.data import ConcatDataset
 from torch_geometric.data import InMemoryDataset
-from torch_geometric.transforms import NormalizeScale, RadiusGraph, ToSLIC
+from torch_geometric.transforms import RadiusGraph, ToSLIC
 from torchvision import transforms as T
 from torchvision.datasets import FashionMNIST
 
 
 class FashionMNISTSuperpixelsDataset(InMemoryDataset):
+    """Dataset which converts FashionMNISTS to superpixel graphs (on first run only)."""
+
     def __init__(
-        self, root, n_segments=100, max_num_neighbors=8, r=10, transform=None, pre_transform=None
+        self,
+        root: str = "data/",
+        n_segments: int = 100,
+        max_num_neighbors: int = 8,
+        r: float = 10,
+        loop: bool = True,
+        transform: Optional[Callable] = None,
+        pre_transform: Optional[Callable] = None,
+        **kwargs,
     ):
         self.data_dir = root
         self.n_segments = n_segments
+        self.max_num_neighbors = max_num_neighbors
+        self.r = r
+        self.loop = loop
+        self.slic_kwargs = kwargs
         self.base_transform = T.Compose(
             [
                 T.ToTensor(),
-                ToSLIC(n_segments=n_segments),
-                RadiusGraph(r=r, max_num_neighbors=max_num_neighbors, loop=True),
-                NormalizeScale(),
+                ToSLIC(n_segments=n_segments, **kwargs),
+                RadiusGraph(r=r, max_num_neighbors=max_num_neighbors, loop=loop),
             ]
         )
         super().__init__(os.path.join(root, "FashionMNIST"), transform, pre_transform)
@@ -32,7 +46,16 @@ class FashionMNISTSuperpixelsDataset(InMemoryDataset):
 
     @property
     def processed_file_names(self):
-        return [f"fashion_mnist_sp_{self.n_segments}.pt"]
+        """Dynamically generates filename for processed dataset based on superpixel parameters."""
+        filename = ""
+        filename += f"sp({self.n_segments})_"
+        filename += f"maxn({self.max_num_neighbors})_"
+        filename += f"r({self.r})_"
+        filename += f"loop({self.loop})"
+        for name, value in self.slic_kwargs.items():
+            filename += f"_{name}({value})"
+        filename += ".pt"
+        return filename
 
     def download(self):
         FashionMNIST(self.data_dir, train=True, download=True, transform=self.base_transform)
@@ -48,7 +71,6 @@ class FashionMNISTSuperpixelsDataset(InMemoryDataset):
         dataset = ConcatDataset(datasets=[trainset, testset])
 
         # convert to superpixels
-        print("This may take a few minutes on first run...")
         data_list = []
         for graph, label in tqdm.tqdm(dataset, desc="Generating superpixels", colour="GREEN"):
             datapoint = graph

@@ -23,19 +23,23 @@ class FashionMNISTSuperpixelsDataModule(LightningDataModule):
         batch_size: int = 32,
         num_workers: int = 0,
         pin_memory: bool = False,
+        **kwargs,
     ):
-        """DataModule which converts FashionMNIST dataset to superpixel graphs.
+        """DataModule which converts FashionMNIST to superpixel graphs.
+        Conversion happens on first run only.
+        When changing pre_transforms you need to manually delete previously generated dataset files!
 
         Args:
-            data_dir (str): Path to data folder.
-            train_val_test_split (Sequence[int]): Defaults to (55_000, 5_000, 10_000).
-            n_segments (int): Number of superpixels per image.
-            max_num_neighbors (int): Maximum number of edges for each node/superpixel.
-            r (int): Connect node/superpixel to all nodes in range r (based on superpixel position).
-            batch_size (int): Batch size
-            num_workers (int): number of processes for data loading.
-            pin_memory (bool): Pinning cuda memory for GPU users.
-
+            data_dir (str):                         Path to data folder.
+            train_val_test_split (Sequence[int]):   Number of datapoints for training, validation and testing. Should sum up to 70_000.
+            n_segments (int):                       Number of superpixels per image.
+            max_num_neighbors (int):                Maximum number of edges for each node/superpixel.
+            r (int):                                Connect node/superpixel to all nodes in range r (based on superpixel position).
+            batch_size (int):                       Batch size.
+            num_workers (int):                      Number of processes for data loading.
+            pin_memory (bool):                      Whether to pin CUDA memory (slight speed up for GPU users).
+            **kwargs :                              Extra paramters passed to SLIC algorithm, learn more here:
+                                                    https://scikit-image.org/docs/dev/api/skimage.segmentation.html#skimage.segmentation.slic
         """
         super().__init__()
 
@@ -51,6 +55,8 @@ class FashionMNISTSuperpixelsDataModule(LightningDataModule):
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.pin_memory = pin_memory
+
+        self.slic_kwargs = kwargs
 
         self.pre_transform = T.Compose(
             [
@@ -80,6 +86,7 @@ class FashionMNISTSuperpixelsDataModule(LightningDataModule):
             r=self.r,
             max_num_neighbors=self.max_num_neighbors,
             pre_transform=self.pre_transform,
+            **self.slic_kwargs,
         )
 
     def setup(self, stage: Optional[str] = None):
@@ -91,6 +98,7 @@ class FashionMNISTSuperpixelsDataModule(LightningDataModule):
             max_num_neighbors=self.max_num_neighbors,
             pre_transform=self.pre_transform,
             transform=self.transform,
+            **self.slic_kwargs,
         )
         self.data_train, self.data_val, self.data_test = random_split(
             dataset, self.train_val_test_split
