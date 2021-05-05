@@ -29,8 +29,11 @@ model:
   weight_decay: 0
 
 datamodule:
-  batch_size: 128
   train_val_test_split: [55_000, 5_000, 10_000]
+  n_segments: 100
+  max_num_neighbors: 8
+  r: 6
+  batch_size: 128
 
 callbacks:
   model_checkpoint:
