@@ -12,11 +12,13 @@ def main(config: DictConfig):
 
     # Imports should be nested inside @hydra.main to optimize tab completion
     # Read more here: https://github.com/facebookresearch/hydra/issues/934
+    import time
+    import traceback
+
+    import wandb
+
     from src.train import train
     from src.utils import utils
-    import traceback
-    import time
-    import wandb
 
     # A couple of optional utilities:
     # - disabling python warnings

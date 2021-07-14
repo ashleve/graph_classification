@@ -5,11 +5,8 @@ from pytorch_lightning import LightningDataModule
 from torch.utils.data import random_split
 from torch_geometric.data import DataLoader, Dataset
 from torch_geometric.transforms import NormalizeScale
-from torchvision import transforms as T
 
-from src.datamodules.datasets.sp_fashion_mnist_dataset import (
-    FashionMNISTSuperpixelsDataset,
-)
+from src.datamodules.datasets.sp_fashion_mnist_dataset import FashionMNISTSuperpixelsDataset
 
 
 class FashionMNISTSuperpixelsDataModule(LightningDataModule):
