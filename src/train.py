@@ -1,16 +1,19 @@
-import logging
 from typing import List, Optional
-
-from pytorch_lightning import LightningModule, LightningDataModule, Callback, Trainer
-from pytorch_lightning.loggers import LightningLoggerBase
-from pytorch_lightning import seed_everything
 
 import hydra
 from omegaconf import DictConfig
+from pytorch_lightning import (
+    Callback,
+    LightningDataModule,
+    LightningModule,
+    Trainer,
+    seed_everything,
+)
+from pytorch_lightning.loggers import LightningLoggerBase
 
-from src.utils import template_utils
+from src.utils import utils
 
-log = logging.getLogger(__name__)
+log = utils.get_logger(__name__)
 
 
 def train(config: DictConfig) -> Optional[float]:
@@ -26,33 +29,33 @@ def train(config: DictConfig) -> Optional[float]:
 
     # Set seed for random number generators in pytorch, numpy and python.random
     if "seed" in config:
-        seed_everything(config.seed)
+        seed_everything(config.seed, workers=True)
 
-    # Init Lightning datamodule
+    # Init lightning datamodule
     log.info(f"Instantiating datamodule <{config.datamodule._target_}>")
     datamodule: LightningDataModule = hydra.utils.instantiate(config.datamodule)
-    datamodule.setup()
-    # Init Lightning model
-    log.info(f"Instantiating model <{config.model._target_}>")
-    model: LightningModule = hydra.utils.instantiate(config.model, _recursive_=False)
 
-    # Init Lightning callbacks
+    # Init lightning model
+    log.info(f"Instantiating model <{config.model._target_}>")
+    model: LightningModule = hydra.utils.instantiate(config.model)
+
+    # Init lightning callbacks
     callbacks: List[Callback] = []
     if "callbacks" in config:
-        for _, cb_conf in config["callbacks"].items():
+        for _, cb_conf in config.callbacks.items():
             if "_target_" in cb_conf:
                 log.info(f"Instantiating callback <{cb_conf._target_}>")
                 callbacks.append(hydra.utils.instantiate(cb_conf))
 
-    # Init Lightning loggers
+    # Init lightning loggers
     logger: List[LightningLoggerBase] = []
     if "logger" in config:
-        for _, lg_conf in config["logger"].items():
+        for _, lg_conf in config.logger.items():
             if "_target_" in lg_conf:
                 log.info(f"Instantiating logger <{lg_conf._target_}>")
                 logger.append(hydra.utils.instantiate(lg_conf))
 
-    # Init Lightning trainer
+    # Init lightning trainer
     log.info(f"Instantiating trainer <{config.trainer._target_}>")
     trainer: Trainer = hydra.utils.instantiate(
         config.trainer, callbacks=callbacks, logger=logger, _convert_="partial"
@@ -60,7 +63,7 @@ def train(config: DictConfig) -> Optional[float]:
 
     # Send some parameters from config to all lightning loggers
     log.info("Logging hyperparameters!")
-    template_utils.log_hyperparameters(
+    utils.log_hyperparameters(
         config=config,
         model=model,
         datamodule=datamodule,
@@ -73,14 +76,14 @@ def train(config: DictConfig) -> Optional[float]:
     log.info("Starting training!")
     trainer.fit(model=model, datamodule=datamodule)
 
-    # Evaluate model on test set after training
-    if not config.trainer.get("fast_dev_run"):
+    # Evaluate model on test set, using the best model achieved during training
+    if config.get("test_after_training") and not config.trainer.get("fast_dev_run"):
         log.info("Starting testing!")
         trainer.test()
 
     # Make sure everything closed properly
     log.info("Finalizing!")
-    template_utils.finish(
+    utils.finish(
         config=config,
         model=model,
         datamodule=datamodule,
@@ -92,7 +95,7 @@ def train(config: DictConfig) -> Optional[float]:
     # Print path to best checkpoint
     log.info(f"Best checkpoint path:\n{trainer.checkpoint_callback.best_model_path}")
 
-    # Return metric score for Optuna optimization
+    # Return metric score for hyperparameter optimization
     optimized_metric = config.get("optimized_metric")
     if optimized_metric:
         return trainer.callback_metrics[optimized_metric]

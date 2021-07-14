@@ -1,19 +1,18 @@
 # @package _global_
 
 defaults:
-    - override /trainer: default_trainer.yaml
-    - override /model: sp_classifier_model.yaml
-    - override /datamodule: fashion_mnist_sp.yaml
-    - override /callbacks: default_callbacks.yaml
-    - override /logger: null
-
+  - override /trainer: default_trainer.yaml
+  - override /model: sp_classifier_model.yaml
+  - override /datamodule: fashion_mnist_sp.yaml
+  - override /callbacks: default_callbacks.yaml
+  - override /logger: null
 
 seed: 12345
 
 trainer:
-    min_epochs: 10
-    max_epochs: 100
-    gradient_clip_val: 0.5
+  min_epochs: 10
+  max_epochs: 100
+  gradient_clip_val: 0.5
 
 model:
   architecture: GCN
@@ -29,9 +28,11 @@ model:
   weight_decay: 0
 
 datamodule:
-  num_nodes: 100
-  batch_size: 128
   train_val_test_split: [55_000, 5_000, 10_000]
+  n_segments: 100
+  max_num_neighbors: 8
+  r: 6
+  batch_size: 128
 
 callbacks:
   model_checkpoint:

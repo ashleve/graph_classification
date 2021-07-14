@@ -1,19 +1,18 @@
 # @package _global_
 
 defaults:
-    - override /trainer: default_trainer.yaml
-    - override /model: sp_classifier_model.yaml
-    - override /datamodule: fashion_mnist_sp.yaml
-    - override /callbacks: default_callbacks.yaml
-    - override /logger: null
-
+  - override /trainer: default_trainer.yaml
+  - override /model: sp_classifier_model.yaml
+  - override /datamodule: fashion_mnist_sp.yaml
+  - override /callbacks: default_callbacks.yaml
+  - override /logger: null
 
 seed: 12345
 
 trainer:
-    min_epochs: 10
-    max_epochs: 100
-    gradient_clip_val: 0.5
+  min_epochs: 10
+  max_epochs: 100
+  gradient_clip_val: 0.5
 
 model:
   architecture: GraphSAGE

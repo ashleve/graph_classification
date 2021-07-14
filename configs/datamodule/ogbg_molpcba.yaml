@@ -2,5 +2,5 @@ _target_: src.datamodules.ogbg_molpcba.OGBGMolpcba
 
 data_dir: ${data_dir}
 batch_size: 64
-pin_memory: True
+pin_memory: False
 num_workers: 10

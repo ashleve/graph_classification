@@ -63,6 +63,7 @@ class SuperpixelClassifierModel(LightningModule):
         return self.model(batch)
 
     def step(self, batch: Any):
+        batch.x = torch.cat([batch.x, batch.pos], dim=-1)
         logits = self.forward(batch)
         loss = self.criterion(logits, batch.y)
         preds = torch.argmax(logits, dim=1)

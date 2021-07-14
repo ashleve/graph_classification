@@ -2,7 +2,6 @@
 
 _target_: pytorch_lightning.Trainer
 
-
 gpus: 0
 
 min_epochs: 1
@@ -42,8 +41,6 @@ tpu_cores: null
 deterministic: False
 
 resume_from_checkpoint: null
-
-
 # automatically find the largest batch size that fits into memory and is power of 2
 # (requires calling trainer.tune(model=model, datamodule=datamodule))
 # auto_scale_batch_size:'power'

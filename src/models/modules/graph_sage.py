@@ -1,10 +1,5 @@
 from torch import nn
-from torch_geometric.nn import (
-    SAGEConv,
-    global_add_pool,
-    global_max_pool,
-    global_mean_pool,
-)
+from torch_geometric.nn import SAGEConv, global_add_pool, global_max_pool, global_mean_pool
 
 
 class GraphSAGE(nn.Module):

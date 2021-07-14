@@ -12,11 +12,13 @@ def main(config: DictConfig):
 
     # Imports should be nested inside @hydra.main to optimize tab completion
     # Read more here: https://github.com/facebookresearch/hydra/issues/934
-    from src.train import train
-    from src.utils import template_utils
-    import traceback
     import time
+    import traceback
+
     import wandb
+
+    from src.train import train
+    from src.utils import utils
 
     # A couple of optional utilities:
     # - disabling python warnings
@@ -24,11 +26,11 @@ def main(config: DictConfig):
     # - forcing debug friendly configuration
     # - forcing multi-gpu friendly configuration
     # You can safely get rid of this line if you don't want those
-    template_utils.extras(config)
+    utils.extras(config)
 
     # Pretty print config using Rich library
     if config.get("print_config"):
-        template_utils.print_config(config, resolve=True)
+        utils.print_config(config, resolve=True)
 
     # Train model
     try:
