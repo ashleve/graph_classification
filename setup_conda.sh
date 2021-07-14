@@ -31,6 +31,6 @@ fi
 # Install pytorch geometric
 conda install -y pytorch-geometric -c rusty1s -c conda-forge
 
-echo "\n"
+echo ""
 echo "To activate this environment, use:"
 echo "conda activate $env_name"
