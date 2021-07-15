@@ -28,7 +28,7 @@ model:
   weight_decay: 0
 
 datamodule:
-  num_nodes: 100
+  n_segments: 100
   batch_size: 256
   train_val_test_split: [45_000, 5_000, 10_000]
 

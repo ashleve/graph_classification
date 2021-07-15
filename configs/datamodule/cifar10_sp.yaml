@@ -1,4 +1,4 @@
-_target_: src.datamodules.cifar10_sp.CIFAR10SuperpixelsCustom
+_target_: src.datamodules.sp_cifar10_datamodule.CIFAR10SuperpixelsDataModule
 
 data_dir: ${data_dir}
 batch_size: 64

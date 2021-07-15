@@ -1,4 +1,4 @@
-_target_: src.datamodules.ogbg_ppa.OGBGPpa
+_target_: src.datamodules.ogbg_ppa_datamodule.OGBGPpa
 
 data_dir: ${data_dir}
 batch_size: 64

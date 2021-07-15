@@ -9,7 +9,7 @@ from torch_geometric.transforms import NormalizeScale
 from src.datamodules.datasets.sp_fashion_mnist_dataset import FashionMNISTSuperpixelsDataset
 
 
-class FashionMNISTSuperpixelsDataModule(LightningDataModule):
+class CIFAR10SuperpixelsDataModule(LightningDataModule):
     def __init__(
         self,
         data_dir: str = "data/",
