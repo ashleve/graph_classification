@@ -1,4 +1,4 @@
-_target_: src.datamodules.ogbg_molpcba.OGBGMolpcba
+_target_: src.datamodules.ogbg_molpcba_datamodule.OGBGMolpcba
 
 data_dir: ${data_dir}
 batch_size: 64

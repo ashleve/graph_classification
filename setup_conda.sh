@@ -1,7 +1,6 @@
 #!/bin/bash
-# Run from root folder with: bash bash/setup.sh
 
-# check if conda is installed
+# Check if conda is installed
 if ! command -v conda &> /dev/null
 then
     echo "conda could not be found"
@@ -31,6 +30,10 @@ fi
 # Install pytorch geometric
 conda install -y pytorch-geometric -c rusty1s -c conda-forge
 
+# Install requirements
+pip install -r requirements.txt
+
+# Print message
 echo ""
 echo "To activate this environment, use:"
 echo "conda activate $env_name"

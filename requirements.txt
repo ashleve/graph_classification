@@ -38,6 +38,7 @@ rich            # beautiful text formatting in terminal
 pytest          # tests
 sh              # for running bash commands in some tests
 scikit-learn    # used in some callbacks
+scikit-image    # for superpixel generation
 seaborn         # used in some callbacks
 jupyterlab      # better jupyter notebooks
 pudb            # debugger

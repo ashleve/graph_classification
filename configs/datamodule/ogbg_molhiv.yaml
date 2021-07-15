@@ -1,4 +1,4 @@
-_target_: src.datamodules.ogbg_molhiv.OGBGMolhiv
+_target_: src.datamodules.ogbg_molhiv_datamodule.OGBGMolhiv
 
 data_dir: ${data_dir}
 batch_size: 64

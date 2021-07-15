@@ -5,14 +5,14 @@ from pytorch_lightning import LightningDataModule
 from torch.utils.data import random_split
 from torch_geometric.data import DataLoader, Dataset
 
-from src.datamodules.datasets.sp_fashion_mnist_dataset import FashionMNISTSuperpixelsDataset
+from src.datamodules.datasets.sp_cifar10_dataset import CIFAR10SuperpixelsDataset
 
 
 class FashionMNISTSuperpixelsDataModule(LightningDataModule):
     def __init__(
         self,
         data_dir: str = "data/",
-        train_val_test_split: Sequence[int] = (55_000, 5_000, 10_000),
+        train_val_test_split: Sequence[int] = (45_000, 5_000, 10_000),
         n_segments: int = 100,
         sp_generation_workers: int = 4,
         batch_size: int = 32,
@@ -20,7 +20,7 @@ class FashionMNISTSuperpixelsDataModule(LightningDataModule):
         pin_memory: bool = False,
         **kwargs,
     ):
-        """DataModule which converts FashionMNIST to superpixel graphs.
+        """DataModule which converts CIFAR10 to dataset of superpixel graphs.
         Conversion happens on first run only.
         When changing pre_transforms you need to manually delete previously generated dataset files!
 
@@ -61,12 +61,12 @@ class FashionMNISTSuperpixelsDataModule(LightningDataModule):
 
     @property
     def num_node_features() -> int:
-        return 1
+        return 3
 
     def prepare_data(self):
         """Download data if needed. Generate superpixel graphs. Apply pre-transforms.
         This method is called only from a single GPU. Do not use it to assign state (self.x = y)."""
-        FashionMNISTSuperpixelsDataset(
+        CIFAR10SuperpixelsDataset(
             self.data_dir,
             n_segments=self.n_segments,
             num_workers=self.sp_generation_workers,
@@ -75,7 +75,7 @@ class FashionMNISTSuperpixelsDataModule(LightningDataModule):
 
     def setup(self, stage: Optional[str] = None):
         """Load data. Set variables: self.data_train, self.data_val, self.data_test."""
-        dataset = FashionMNISTSuperpixelsDataset(
+        dataset = CIFAR10SuperpixelsDataset(
             self.data_dir,
             n_segments=self.n_segments,
             num_workers=self.sp_generation_workers,
