@@ -3,13 +3,13 @@ import os
 import numpy as np
 import torch
 from torch_geometric.data import Data, InMemoryDataset
-from torchvision.datasets import MNIST
+from torchvision.datasets import CIFAR10
 
 from src.utils.superpixel_generation import convert_torchvision_dataset_to_superpixel_graphs
 
 
-class MNISTSuperpixelsDataset(InMemoryDataset):
-    """Dataset which converts MNIST to superpixel graphs (on first run only)."""
+class CIFAR10SuperpixelsDataset(InMemoryDataset):
+    """Dataset which converts CIFAR10 to dataset of superpixel graphs (on first run only)."""
 
     def __init__(
         self,
@@ -23,7 +23,7 @@ class MNISTSuperpixelsDataset(InMemoryDataset):
         self.n_segments = n_segments
         self.slic_kwargs = kwargs
 
-        super().__init__(os.path.join(root, "MNIST"))
+        super().__init__(os.path.join(root, "CIFAR10"))
 
         self.data, self.slices = torch.load(self.processed_paths[0])
 
@@ -42,16 +42,15 @@ class MNISTSuperpixelsDataset(InMemoryDataset):
         return filename
 
     def download(self):
-        MNIST(self.data_dir, train=True, download=True)
-        MNIST(self.data_dir, train=False, download=True)
+        CIFAR10(self.data_dir, train=True, download=True)
+        CIFAR10(self.data_dir, train=False, download=True)
 
     def process(self):
-        trainset = MNIST(self.data_dir, train=True, download=True)
-        testset = MNIST(self.data_dir, train=False, download=True)
+        trainset = CIFAR10(self.data_dir, train=True, download=True)
+        testset = CIFAR10(self.data_dir, train=False, download=True)
 
         labels = np.concatenate((trainset.targets, testset.targets))
         images = np.concatenate((trainset.data, testset.data))
-        images = np.reshape(images, (len(images), 28, 28, 1))
 
         dataset = (images, labels)
 
