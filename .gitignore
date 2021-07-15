@@ -146,3 +146,4 @@ wandb/
 .env
 .autoenv
 test.py
+test2.py

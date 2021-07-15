@@ -30,7 +30,7 @@ def save_torch_geometric_superpixel_dataset(data_dir, dataset_name: str, data: d
 
 
 def convert_torchvision_dataset_to_superpixel_graphs(
-    dataset, desired_nodes: int = 75, num_workers: int = 4
+    dataset, desired_nodes: int = 75, num_workers: int = 4, **slic_kwargs
 ):
     """Convert torchvision dataset to superpixel graphs
 
@@ -57,16 +57,19 @@ def convert_torchvision_dataset_to_superpixel_graphs(
     pos_slices_list = [0]
     y_slices_list = [0]
 
-    print("Processing images into graphs...")
     start_time = time.time()
 
     # apply better istarmap trick (enables progress bar when using multiprocessing)
     multiprocessing.pool.Pool.istarmap = multiprocessing_istarmap
 
     with multiprocessing.Pool(num_workers) as pool:
-        args = list(zip(images, repeat(desired_nodes)))
+        args = list(zip(images, repeat(desired_nodes), repeat(slic_kwargs)))
+
         for graph in tqdm(
-            pool.istarmap(convert_numpy_img_to_superpixel_graph, args), total=len(args)
+            pool.istarmap(convert_numpy_img_to_superpixel_graph, args),
+            total=len(args),
+            desc="Generating superpixels",
+            colour="GREEN",
         ):
             x, edge_index, pos = graph
 
@@ -101,7 +104,7 @@ def convert_torchvision_dataset_to_superpixel_graphs(
     return data, slices
 
 
-def convert_numpy_img_to_superpixel_graph(img, desired_nodes: int = 75):
+def convert_numpy_img_to_superpixel_graph(img, desired_nodes: int = 75, slic_kwargs={}):
     """Convert numpy img to superpixel grap.
     Each superpixel is connected to all superpixels it directly touches.
 
@@ -121,7 +124,7 @@ def convert_numpy_img_to_superpixel_graph(img, desired_nodes: int = 75):
     width = img.shape[1]
     num_of_features = img.shape[2]
 
-    segments = slic(img, n_segments=desired_nodes, slic_zero=True, start_label=0)
+    segments = slic(img, n_segments=desired_nodes, slic_zero=True, start_label=0, **slic_kwargs)
 
     num_of_nodes = np.max(segments) + 1
     nodes = {node: {"rgb_list": [], "pos_list": []} for node in range(num_of_nodes)}
