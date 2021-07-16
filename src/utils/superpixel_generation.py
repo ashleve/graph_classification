@@ -19,18 +19,8 @@ from tqdm.auto import tqdm
 from src.utils.multiprocessing_istarmap import multiprocessing_istarmap
 
 
-def save_torch_geometric_superpixel_dataset(data_dir, dataset_name: str, data: dict, slices: dict):
-    dataset = Data(x=data["x"], edge_index=data["edge_index"], pos=data["pos"], y=data["y"])
-
-    path = os.path.join(data_dir, dataset_name, "processed")
-    if not os.path.exists(path):
-        os.makedirs(path)
-
-    torch.save((dataset, slices), path + "/data.pt")
-
-
-def convert_torchvision_dataset_to_superpixel_graphs(
-    dataset, desired_nodes: int = 75, num_workers: int = 4, **slic_kwargs
+def convert_img_dataset_to_superpixel_graph_dataset(
+    images, labels, desired_nodes: int = 75, num_workers: int = 4, **slic_kwargs
 ):
     """Convert torchvision dataset to superpixel graphs
 
@@ -44,18 +34,9 @@ def convert_torchvision_dataset_to_superpixel_graphs(
             Don't use too much or it will crash.
     """
 
-    images, labels = dataset
+    assert len(images) == len(labels)
 
-    # first we gather all graphs into lists, then we convert them into torch matrixes
-    x_list = []
-    edge_index_list = []
-    pos_list = []
-
-    # slices to know when given graphs starts and stops in a dataset matrix
-    x_slices_list = [0]
-    edge_index_slices_list = [0]
-    pos_slices_list = [0]
-    y_slices_list = [0]
+    data_list = []
 
     start_time = time.time()
 
@@ -63,7 +44,7 @@ def convert_torchvision_dataset_to_superpixel_graphs(
     multiprocessing.pool.Pool.istarmap = multiprocessing_istarmap
 
     with multiprocessing.Pool(num_workers) as pool:
-        args = list(zip(images, repeat(desired_nodes), repeat(slic_kwargs)))
+        args = list(zip(images, labels, repeat(desired_nodes), repeat(slic_kwargs)))
 
         for graph in tqdm(
             pool.istarmap(convert_numpy_img_to_superpixel_graph, args),
@@ -71,40 +52,20 @@ def convert_torchvision_dataset_to_superpixel_graphs(
             desc="Generating superpixels",
             colour="GREEN",
         ):
-            x, edge_index, pos = graph
-
-            x_list.append(torch.as_tensor(x, dtype=torch.float32))
-            edge_index_list.append(torch.as_tensor(edge_index, dtype=torch.long))
-            pos_list.append(torch.as_tensor(pos, dtype=torch.float32))
-
-            x_slices_list.append(x_slices_list[-1] + len(x))
-            edge_index_slices_list.append(edge_index_slices_list[-1] + len(edge_index))
-            pos_slices_list.append(pos_slices_list[-1] + len(pos))
-            y_slices_list.append(y_slices_list[-1] + 1)
+            x, edge_index, pos, y = graph
+            x = torch.as_tensor(x, dtype=torch.float32)
+            edge_index = torch.as_tensor(edge_index, dtype=torch.long).T
+            pos = torch.as_tensor(pos, dtype=torch.float32)
+            y = torch.as_tensor(y, dtype=torch.long)
+            data_list.append(Data(x=x, edge_index=edge_index, pos=pos, y=y))
 
     total_time = time.time() - start_time
     print(f"Took {total_time}s.")
 
-    data = {}
-    data["x"] = torch.cat(x_list, dim=0)
-    data["edge_index"] = torch.cat(edge_index_list, dim=0).T
-    data["pos"] = torch.cat(pos_list, dim=0)
-    data["y"] = torch.as_tensor(labels, dtype=torch.long)
-
-    del x_list, edge_index_list, pos_list
-
-    slices = {}
-    slices["x"] = torch.as_tensor(x_slices_list, dtype=torch.long)
-    slices["edge_index"] = torch.as_tensor(edge_index_slices_list, dtype=torch.long)
-    slices["pos"] = torch.as_tensor(pos_slices_list, dtype=torch.long)
-    slices["y"] = torch.as_tensor(y_slices_list, dtype=torch.long)
-
-    del x_slices_list, edge_index_slices_list, pos_slices_list, y_slices_list
-
-    return data, slices
+    return data_list
 
 
-def convert_numpy_img_to_superpixel_graph(img, desired_nodes: int = 75, slic_kwargs={}):
+def convert_numpy_img_to_superpixel_graph(img, label, desired_nodes: int = 75, slic_kwargs={}):
     """Convert numpy img to superpixel grap.
     Each superpixel is connected to all superpixels it directly touches.
 
@@ -179,39 +140,6 @@ def convert_numpy_img_to_superpixel_graph(img, desired_nodes: int = 75, slic_kwa
     for node in G.nodes:
         x[node, :] = G.nodes[node]["features"]
 
-    return x, edge_index, pos
+    y = label
 
-
-if __name__ == "__main__":
-    from torchvision.datasets import CIFAR10, MNIST, FashionMNIST
-
-    trainset = FashionMNIST("data/", download=True, train=True)
-    testset = FashionMNIST("data/", download=True, train=False)
-
-    train_images = trainset.data
-    test_images = testset.data
-    print(train_images.shape)
-    print(test_images.shape)
-
-    images = np.concatenate((train_images, test_images))
-
-    # don't do reshape for cifar10!
-    images = np.reshape(images, (len(images), 28, 28, 1))
-    print(images.shape)
-
-    train_labels = trainset.targets
-    test_labels = testset.targets
-    labels = np.concatenate((train_labels, test_labels))
-    print(labels.shape)
-
-    dataset = (images, labels)
-    data, slices = convert_torchvision_dataset_to_superpixel_graphs(
-        dataset, desired_nodes=100, num_workers=10
-    )
-
-    # torch_dataset = Data(x=data["x"], edge_index=data["edge_index"], pos=data["pos"], y=data["y"])
-    # print(torch_dataset)
-
-    save_torch_geometric_superpixel_dataset(
-        data_dir="data/", dataset_name="fahion_mnist_sp100", data=data, slices=slices
-    )
+    return x, edge_index, pos, y

@@ -22,6 +22,7 @@ class FashionMNISTSuperpixelsDataset(InMemoryDataset):
         loop: bool = True,
         transform: Optional[Callable] = None,
         pre_transform: Optional[Callable] = None,
+        pre_filter: Optional[Callable] = None,
         **kwargs,
     ):
         self.data_dir = root
@@ -37,7 +38,7 @@ class FashionMNISTSuperpixelsDataset(InMemoryDataset):
                 RadiusGraph(r=r, max_num_neighbors=max_num_neighbors, loop=loop),
             ]
         )
-        super().__init__(os.path.join(root, "FashionMNIST"), transform, pre_transform)
+        super().__init__(os.path.join(root, "FashionMNIST"), transform, pre_transform, pre_filter)
         self.data, self.slices = torch.load(self.processed_paths[0])
 
     @property
