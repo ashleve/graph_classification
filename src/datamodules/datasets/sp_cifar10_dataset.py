@@ -14,7 +14,7 @@ class CIFAR10SuperpixelsDataset(InMemoryDataset):
 
     def __init__(
         self,
-        root: str = "data/",
+        data_dir: str = "data/",
         num_workers: int = 4,
         n_segments: int = 100,
         transform: Optional[Callable] = None,
@@ -22,7 +22,7 @@ class CIFAR10SuperpixelsDataset(InMemoryDataset):
         pre_filter: Optional[Callable] = None,
         **kwargs,
     ):
-        self.data_dir = os.path.join(root, "/CIFAR10")
+        self.data_dir = os.path.join(data_dir, "CIFAR10")
         self.num_workers = num_workers
         self.n_segments = n_segments
         self.slic_kwargs = kwargs
@@ -44,10 +44,6 @@ class CIFAR10SuperpixelsDataset(InMemoryDataset):
             filename += f"_{name}({value})"
         filename += ".pt"
         return filename
-
-    def download(self):
-        CIFAR10(self.data_dir, train=True, download=True)
-        CIFAR10(self.data_dir, train=False, download=True)
 
     def process(self):
         trainset = CIFAR10(self.data_dir, train=True, download=True)

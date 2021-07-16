@@ -58,10 +58,6 @@ class FashionMNISTSuperpixelsDataset(InMemoryDataset):
         filename += ".pt"
         return filename
 
-    def download(self):
-        FashionMNIST(self.data_dir, train=True, download=True, transform=self.base_transform)
-        FashionMNIST(self.data_dir, train=False, download=True, transform=self.base_transform)
-
     def process(self):
         trainset = FashionMNIST(
             self.data_dir, train=True, download=True, transform=self.base_transform

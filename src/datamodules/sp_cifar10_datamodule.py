@@ -76,7 +76,7 @@ class CIFAR10SuperpixelsDataModule(LightningDataModule):
         """Download data if needed. Generate superpixel graphs. Apply pre-transforms.
         This method is called only from a single GPU. Do not use it to assign state (self.x = y)."""
         CIFAR10SuperpixelsDataset(
-            self.data_dir,
+            data_dir=self.data_dir,
             n_segments=self.n_segments,
             num_workers=self.sp_generation_workers,
             transform=self.transform,
@@ -88,7 +88,7 @@ class CIFAR10SuperpixelsDataModule(LightningDataModule):
     def setup(self, stage: Optional[str] = None):
         """Load data. Set variables: self.data_train, self.data_val, self.data_test."""
         dataset = CIFAR10SuperpixelsDataset(
-            self.data_dir,
+            data_dir=self.data_dir,
             n_segments=self.n_segments,
             num_workers=self.sp_generation_workers,
             transform=self.transform,

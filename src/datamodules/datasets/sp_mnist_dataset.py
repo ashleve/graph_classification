@@ -14,7 +14,7 @@ class MNISTSuperpixelsDataset(InMemoryDataset):
 
     def __init__(
         self,
-        root: str = "data/",
+        data_dir: str = "data/",
         num_workers: int = 4,
         n_segments: int = 75,
         transform: Optional[Callable] = None,
@@ -22,12 +22,14 @@ class MNISTSuperpixelsDataset(InMemoryDataset):
         pre_filter: Optional[Callable] = None,
         **kwargs,
     ):
-        self.data_dir = root
+        self.data_dir = data_dir
         self.num_workers = num_workers
         self.n_segments = n_segments
         self.slic_kwargs = kwargs
 
-        super().__init__(os.path.join(root, "MNIST"), transform, pre_transform, pre_filter)
+        super().__init__(
+            os.path.join(self.data_dir, "MNIST"), transform, pre_transform, pre_filter
+        )
 
         self.data, self.slices = torch.load(self.processed_paths[0])
 
@@ -44,10 +46,6 @@ class MNISTSuperpixelsDataset(InMemoryDataset):
             filename += f"_{name}({value})"
         filename += ".pt"
         return filename
-
-    def download(self):
-        MNIST(self.data_dir, train=True, download=True)
-        MNIST(self.data_dir, train=False, download=True)
 
     def process(self):
         trainset = MNIST(self.data_dir, train=True, download=True)
