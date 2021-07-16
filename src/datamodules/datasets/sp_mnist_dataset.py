@@ -1,11 +1,12 @@
 import os
+from typing import Callable, Optional
 
 import numpy as np
 import torch
-from torch_geometric.data import Data, InMemoryDataset
+from torch_geometric.data import InMemoryDataset
 from torchvision.datasets import MNIST
 
-from src.utils.superpixel_generation import convert_torchvision_dataset_to_superpixel_graphs
+from src.utils.superpixel_generation import convert_img_dataset_to_superpixel_graph_dataset
 
 
 class MNISTSuperpixelsDataset(InMemoryDataset):
@@ -13,17 +14,22 @@ class MNISTSuperpixelsDataset(InMemoryDataset):
 
     def __init__(
         self,
-        root: str = "data/",
-        num_workers: int = 8,
+        data_dir: str = "data/",
+        num_workers: int = 4,
         n_segments: int = 75,
+        transform: Optional[Callable] = None,
+        pre_transform: Optional[Callable] = None,
+        pre_filter: Optional[Callable] = None,
         **kwargs,
     ):
-        self.data_dir = root
+        self.data_dir = data_dir
         self.num_workers = num_workers
         self.n_segments = n_segments
         self.slic_kwargs = kwargs
 
-        super().__init__(os.path.join(root, "MNIST"))
+        super().__init__(
+            os.path.join(self.data_dir, "MNIST"), transform, pre_transform, pre_filter
+        )
 
         self.data, self.slices = torch.load(self.processed_paths[0])
 
@@ -41,10 +47,6 @@ class MNISTSuperpixelsDataset(InMemoryDataset):
         filename += ".pt"
         return filename
 
-    def download(self):
-        MNIST(self.data_dir, train=True, download=True)
-        MNIST(self.data_dir, train=False, download=True)
-
     def process(self):
         trainset = MNIST(self.data_dir, train=True, download=True)
         testset = MNIST(self.data_dir, train=False, download=True)
@@ -53,12 +55,18 @@ class MNISTSuperpixelsDataset(InMemoryDataset):
         images = np.concatenate((trainset.data, testset.data))
         images = np.reshape(images, (len(images), 28, 28, 1))
 
-        dataset = (images, labels)
-
-        data, slices = convert_torchvision_dataset_to_superpixel_graphs(
-            dataset=dataset, desired_nodes=self.n_segments, num_workers=self.num_workers
+        data_list = convert_img_dataset_to_superpixel_graph_dataset(
+            images=images,
+            labels=labels,
+            desired_nodes=self.n_segments,
+            num_workers=self.num_workers,
         )
 
-        data = Data(x=data["x"], edge_index=data["edge_index"], pos=data["pos"], y=data["y"])
+        if self.pre_filter is not None:
+            data_list = [data for data in data_list if self.pre_filter(data)]
 
+        if self.pre_transform is not None:
+            data_list = [self.pre_transform(data) for data in data_list]
+
+        data, slices = self.collate(data_list)
         torch.save((data, slices), self.processed_paths[0])

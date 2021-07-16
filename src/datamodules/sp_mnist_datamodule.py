@@ -4,6 +4,7 @@ import torch_geometric.transforms as T
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import random_split
 from torch_geometric.data import DataLoader, Dataset
+from torch_geometric.transforms import NormalizeScale
 
 from src.datamodules.datasets.sp_mnist_dataset import MNISTSuperpixelsDataset
 
@@ -40,7 +41,7 @@ class MNISTSuperpixelsDataModule(LightningDataModule):
         self.data_dir = data_dir
         self.train_val_test_split = train_val_test_split
 
-        # superpixel graph parameters
+        # superpixel generation parameters
         self.n_segments = n_segments
         self.sp_generation_workers = sp_generation_workers
 
@@ -50,6 +51,14 @@ class MNISTSuperpixelsDataModule(LightningDataModule):
         self.pin_memory = pin_memory
 
         self.slic_kwargs = kwargs
+
+        self.pre_transform = T.Compose(
+            [
+                NormalizeScale(),
+            ]
+        )
+        self.transform = None
+        self.pre_filter = None
 
         self.data_train: Optional[Dataset] = None
         self.data_val: Optional[Dataset] = None
@@ -70,6 +79,9 @@ class MNISTSuperpixelsDataModule(LightningDataModule):
             self.data_dir,
             n_segments=self.n_segments,
             num_workers=self.sp_generation_workers,
+            transform=self.transform,
+            pre_transform=self.pre_transform,
+            pre_filter=self.pre_filter,
             **self.slic_kwargs,
         )
 
@@ -79,6 +91,9 @@ class MNISTSuperpixelsDataModule(LightningDataModule):
             self.data_dir,
             n_segments=self.n_segments,
             num_workers=self.sp_generation_workers,
+            transform=self.transform,
+            pre_transform=self.pre_transform,
+            pre_filter=self.pre_filter,
             **self.slic_kwargs,
         )
         self.data_train, self.data_val, self.data_test = random_split(
