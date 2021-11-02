@@ -28,7 +28,7 @@ class OGBGMolpcbaModel(LightningModule):
 
         # this line ensures params passed to LightningModule will be saved to ckpt
         # it also allows to access params with 'self.hparams' attribute
-        self.save_hyperparameters()
+        self.save_hyperparameters(logger=False)
 
         # init node embedding layer
         self.atom_encoder = AtomEncoder(emb_dim=self.hparams.num_node_features)

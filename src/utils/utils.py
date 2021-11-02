@@ -5,21 +5,26 @@ from typing import List, Sequence
 import pytorch_lightning as pl
 import rich.syntax
 import rich.tree
-import wandb
 from omegaconf import DictConfig, OmegaConf
-from pytorch_lightning.loggers.wandb import WandbLogger
 from pytorch_lightning.utilities import rank_zero_only
 
 
-def get_logger(name=__name__, level=logging.INFO) -> logging.Logger:
-    """Initializes multi-GPU-friendly python logger."""
+def get_logger(name=__name__) -> logging.Logger:
+    """Initializes multi-GPU-friendly python command line logger."""
 
     logger = logging.getLogger(name)
-    logger.setLevel(level)
 
     # this ensures all logging levels get marked with the rank zero decorator
     # otherwise logs would get multiplied for each GPU process in multi-GPU setup
-    for level in ("debug", "info", "warning", "error", "exception", "fatal", "critical"):
+    for level in (
+        "debug",
+        "info",
+        "warning",
+        "error",
+        "exception",
+        "fatal",
+        "critical",
+    ):
         setattr(logger, level, rank_zero_only(getattr(logger, level)))
 
     return logger
@@ -28,9 +33,8 @@ def get_logger(name=__name__, level=logging.INFO) -> logging.Logger:
 def extras(config: DictConfig) -> None:
     """A couple of optional utilities, controlled by main config file:
     - disabling warnings
-    - easier access to debug mode
     - forcing debug friendly configuration
-    - forcing multi-gpu friendly configuration
+    - verifying experiment name is set when running in experiment mode
 
     Modifies DictConfig in place.
 
@@ -38,43 +42,32 @@ def extras(config: DictConfig) -> None:
         config (DictConfig): Configuration composed by Hydra.
     """
 
-    log = get_logger()
-
-    # enable adding new keys to config
-    OmegaConf.set_struct(config, False)
+    log = get_logger(__name__)
 
     # disable python warnings if <config.ignore_warnings=True>
     if config.get("ignore_warnings"):
         log.info("Disabling python warnings! <config.ignore_warnings=True>")
         warnings.filterwarnings("ignore")
 
-    # set <config.trainer.fast_dev_run=True> if <config.debug=True>
-    if config.get("debug"):
-        log.info("Running in debug mode! <config.debug=True>")
-        config.trainer.fast_dev_run = True
+    # verify experiment name is set when running in experiment mode
+    if config.get("experiment_mode") and not config.get("name"):
+        log.info(
+            "Running in experiment mode without the experiment name specified! "
+            "Use `python run.py mode=exp name=experiment_name`"
+        )
+        log.info("Exiting...")
+        exit()
 
     # force debugger friendly configuration if <config.trainer.fast_dev_run=True>
+    # debuggers don't like GPUs and multiprocessing
     if config.trainer.get("fast_dev_run"):
         log.info("Forcing debugger friendly configuration! <config.trainer.fast_dev_run=True>")
-        # Debuggers don't like GPUs or multiprocessing
         if config.trainer.get("gpus"):
             config.trainer.gpus = 0
         if config.datamodule.get("pin_memory"):
             config.datamodule.pin_memory = False
         if config.datamodule.get("num_workers"):
             config.datamodule.num_workers = 0
-
-    # force multi-gpu friendly configuration if <config.trainer.accelerator=ddp>
-    accelerator = config.trainer.get("accelerator")
-    if accelerator in ["ddp", "ddp_spawn", "dp", "ddp2"]:
-        log.info(f"Forcing ddp friendly configuration! <config.trainer.accelerator={accelerator}>")
-        if config.datamodule.get("num_workers"):
-            config.datamodule.num_workers = 0
-        if config.datamodule.get("pin_memory"):
-            config.datamodule.pin_memory = False
-
-    # disable adding new keys to config
-    OmegaConf.set_struct(config, True)
 
 
 @rank_zero_only
@@ -86,7 +79,9 @@ def print_config(
         "datamodule",
         "callbacks",
         "logger",
+        "test_after_training",
         "seed",
+        "name",
     ),
     resolve: bool = True,
 ) -> None:
@@ -100,7 +95,7 @@ def print_config(
     """
 
     style = "dim"
-    tree = rich.tree.Tree(":gear: CONFIG", style=style, guide_style=style)
+    tree = rich.tree.Tree("CONFIG", style=style, guide_style=style)
 
     for field in fields:
         branch = tree.add(field, style=style, guide_style=style)
@@ -114,9 +109,8 @@ def print_config(
 
     rich.print(tree)
 
-
-def empty(*args, **kwargs):
-    pass
+    with open("config_tree.txt", "w") as fp:
+        rich.print(tree, file=fp)
 
 
 @rank_zero_only
@@ -131,7 +125,7 @@ def log_hyperparameters(
     """This method controls which parameters from Hydra config are saved by Lightning loggers.
 
     Additionaly saves:
-        - number of trainable model parameters
+        - number of model parameters
     """
 
     hparams = {}
@@ -140,6 +134,7 @@ def log_hyperparameters(
     hparams["trainer"] = config["trainer"]
     hparams["model"] = config["model"]
     hparams["datamodule"] = config["datamodule"]
+
     if "seed" in config:
         hparams["seed"] = config["seed"]
     if "callbacks" in config:
@@ -157,11 +152,6 @@ def log_hyperparameters(
     # send hparams to all loggers
     trainer.logger.log_hyperparams(hparams)
 
-    # disable logging any more hyperparameters for all loggers
-    # this is just a trick to prevent trainer from logging hparams of model,
-    # since we already did that above
-    trainer.logger.log_hyperparams = empty
-
 
 def finish(
     config: DictConfig,
@@ -175,5 +165,7 @@ def finish(
 
     # without this sweeps with wandb logger might crash!
     for lg in logger:
-        if isinstance(lg, WandbLogger):
+        if isinstance(lg, pl.loggers.wandb.WandbLogger):
+            import wandb
+
             wandb.finish()

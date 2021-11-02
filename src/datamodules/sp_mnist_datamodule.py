@@ -87,18 +87,19 @@ class MNISTSuperpixelsDataModule(LightningDataModule):
 
     def setup(self, stage: Optional[str] = None):
         """Load data. Set variables: self.data_train, self.data_val, self.data_test."""
-        dataset = MNISTSuperpixelsDataset(
-            self.data_dir,
-            n_segments=self.n_segments,
-            num_workers=self.sp_generation_workers,
-            transform=self.transform,
-            pre_transform=self.pre_transform,
-            pre_filter=self.pre_filter,
-            **self.slic_kwargs,
-        )
-        self.data_train, self.data_val, self.data_test = random_split(
-            dataset, self.train_val_test_split
-        )
+        if not self.data_train and not self.data_val and not self.data_test:
+            dataset = MNISTSuperpixelsDataset(
+                self.data_dir,
+                n_segments=self.n_segments,
+                num_workers=self.sp_generation_workers,
+                transform=self.transform,
+                pre_transform=self.pre_transform,
+                pre_filter=self.pre_filter,
+                **self.slic_kwargs,
+            )
+            self.data_train, self.data_val, self.data_test = random_split(
+                dataset, self.train_val_test_split
+            )
 
     def train_dataloader(self):
         return DataLoader(

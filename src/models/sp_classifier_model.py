@@ -29,7 +29,7 @@ class SuperpixelClassifierModel(LightningModule):
 
         # this line ensures params passed to LightningModule will be saved to ckpt
         # it also allows to access params with 'self.hparams' attribute
-        self.save_hyperparameters()
+        self.save_hyperparameters(logger=False)
 
         # init network architecture
         if self.hparams.architecture == "GCN":

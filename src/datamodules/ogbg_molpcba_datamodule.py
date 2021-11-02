@@ -37,13 +37,14 @@ class OGBGMolpcba(LightningDataModule):
 
     def setup(self, stage: Optional[str] = None):
         """Load data. Set variables: self.data_train, self.data_val, self.data_test."""
-        dataset = PygGraphPropPredDataset(
-            name="ogbg-molpcba", root=self.data_dir, transform=self.transform
-        )
-        split_idx = dataset.get_idx_split()
-        self.data_train = dataset[split_idx["train"]]
-        self.data_val = dataset[split_idx["valid"]]
-        self.data_test = dataset[split_idx["test"]]
+        if not self.data_train and not self.data_val and not self.data_test:
+            dataset = PygGraphPropPredDataset(
+                name="ogbg-molpcba", root=self.data_dir, transform=self.transform
+            )
+            split_idx = dataset.get_idx_split()
+            self.data_train = dataset[split_idx["train"]]
+            self.data_val = dataset[split_idx["valid"]]
+            self.data_test = dataset[split_idx["test"]]
 
     def train_dataloader(self):
         return DataLoader(
