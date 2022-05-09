@@ -30,58 +30,37 @@ def get_logger(name=__name__) -> logging.Logger:
     return logger
 
 
+log = get_logger(__name__)
+
+
 def extras(config: DictConfig) -> None:
-    """A couple of optional utilities, controlled by main config file:
-    - disabling warnings
-    - forcing debug friendly configuration
-    - verifying experiment name is set when running in experiment mode
+    """Applies optional utilities, controlled by config flags.
 
-    Modifies DictConfig in place.
-
-    Args:
-        config (DictConfig): Configuration composed by Hydra.
+    Utilities:
+    - Ignoring python warnings
+    - Rich config printing
     """
-
-    log = get_logger(__name__)
 
     # disable python warnings if <config.ignore_warnings=True>
     if config.get("ignore_warnings"):
         log.info("Disabling python warnings! <config.ignore_warnings=True>")
         warnings.filterwarnings("ignore")
 
-    # verify experiment name is set when running in experiment mode
-    if config.get("experiment_mode") and not config.get("name"):
-        log.info(
-            "Running in experiment mode without the experiment name specified! "
-            "Use `python run.py mode=exp name=experiment_name`"
-        )
-        log.info("Exiting...")
-        exit()
-
-    # force debugger friendly configuration if <config.trainer.fast_dev_run=True>
-    # debuggers don't like GPUs and multiprocessing
-    if config.trainer.get("fast_dev_run"):
-        log.info("Forcing debugger friendly configuration! <config.trainer.fast_dev_run=True>")
-        if config.trainer.get("gpus"):
-            config.trainer.gpus = 0
-        if config.datamodule.get("pin_memory"):
-            config.datamodule.pin_memory = False
-        if config.datamodule.get("num_workers"):
-            config.datamodule.num_workers = 0
+    # pretty print config tree using Rich library if <config.print_config=True>
+    if config.get("print_config"):
+        log.info("Printing config tree with Rich! <config.print_config=True>")
+        print_config(config, resolve=True)
 
 
 @rank_zero_only
 def print_config(
     config: DictConfig,
-    fields: Sequence[str] = (
-        "trainer",
-        "model",
+    print_order: Sequence[str] = (
         "datamodule",
+        "model",
         "callbacks",
         "logger",
-        "test_after_training",
-        "seed",
-        "name",
+        "trainer",
     ),
     resolve: bool = True,
 ) -> None:
@@ -89,28 +68,37 @@ def print_config(
 
     Args:
         config (DictConfig): Configuration composed by Hydra.
-        fields (Sequence[str], optional): Determines which main fields from config will
-        be printed and in what order.
+        print_order (Sequence[str], optional): Determines in what order config components are printed.
         resolve (bool, optional): Whether to resolve reference fields of DictConfig.
     """
 
     style = "dim"
     tree = rich.tree.Tree("CONFIG", style=style, guide_style=style)
 
-    for field in fields:
+    quee = []
+
+    for field in print_order:
+        quee.append(field) if field in config else log.info(f"Field '{field}' not found in config")
+
+    for field in config:
+        if field not in quee:
+            quee.append(field)
+
+    for field in quee:
         branch = tree.add(field, style=style, guide_style=style)
 
-        config_section = config.get(field)
-        branch_content = str(config_section)
-        if isinstance(config_section, DictConfig):
-            branch_content = OmegaConf.to_yaml(config_section, resolve=resolve)
+        config_group = config[field]
+        if isinstance(config_group, DictConfig):
+            branch_content = OmegaConf.to_yaml(config_group, resolve=resolve)
+        else:
+            branch_content = str(config_group)
 
         branch.add(rich.syntax.Syntax(branch_content, "yaml"))
 
     rich.print(tree)
 
-    with open("config_tree.txt", "w") as fp:
-        rich.print(tree, file=fp)
+    with open("config_tree.log", "w") as file:
+        rich.print(tree, file=file)
 
 
 @rank_zero_only
@@ -122,32 +110,36 @@ def log_hyperparameters(
     callbacks: List[pl.Callback],
     logger: List[pl.loggers.LightningLoggerBase],
 ) -> None:
-    """This method controls which parameters from Hydra config are saved by Lightning loggers.
+    """Controls which config parts are saved by Lightning loggers.
 
     Additionaly saves:
-        - number of model parameters
+    - number of model parameters
     """
+
+    if not trainer.logger:
+        return
 
     hparams = {}
 
     # choose which parts of hydra config will be saved to loggers
-    hparams["trainer"] = config["trainer"]
     hparams["model"] = config["model"]
+
+    # save number of model parameters
+    hparams["model/params/total"] = sum(p.numel() for p in model.parameters())
+    hparams["model/params/trainable"] = sum(
+        p.numel() for p in model.parameters() if p.requires_grad
+    )
+    hparams["model/params/non_trainable"] = sum(
+        p.numel() for p in model.parameters() if not p.requires_grad
+    )
+
     hparams["datamodule"] = config["datamodule"]
+    hparams["trainer"] = config["trainer"]
 
     if "seed" in config:
         hparams["seed"] = config["seed"]
     if "callbacks" in config:
         hparams["callbacks"] = config["callbacks"]
-
-    # save number of model parameters
-    hparams["model/params_total"] = sum(p.numel() for p in model.parameters())
-    hparams["model/params_trainable"] = sum(
-        p.numel() for p in model.parameters() if p.requires_grad
-    )
-    hparams["model/params_not_trainable"] = sum(
-        p.numel() for p in model.parameters() if not p.requires_grad
-    )
 
     # send hparams to all loggers
     trainer.logger.log_hyperparams(hparams)
