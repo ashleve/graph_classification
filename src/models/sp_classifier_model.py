@@ -2,7 +2,7 @@ from typing import Any, List
 
 import torch
 from pytorch_lightning import LightningModule
-from pytorch_lightning.metrics.classification import Accuracy
+from torchmetrics.classification.accuracy import Accuracy
 
 from src.models.modules import gat, gcn, gin, graph_sage
 
